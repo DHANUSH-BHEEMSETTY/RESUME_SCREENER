@@ -16,7 +16,7 @@ export function JobDescriptionInput({
       </label>
       <textarea
         id="jd"
-        className="w-full h-48 bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 resize-y transition-all"
+        className="w-full h-48 bg-slate-900 border border-slate-800 rounded-xl p-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
         placeholder="Paste the job description here. Include responsibilities, required skills, and preferred qualifications for best results..."
         value={value}
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}

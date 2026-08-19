@@ -28,7 +28,7 @@ export function CandidateTable({
               <tr
                 key={candidate.resume.fileName}
                 onClick={() => onSelect(candidate)}
-                className="hover:bg-slate-800/30 transition-colors cursor-pointer group"
+                className="hover:bg-slate-800/50 transition-colors cursor-pointer group"
               >
                 <td className="p-4 pl-6">
                   <span className="font-mono text-lg font-bold text-slate-300 group-hover:text-white transition-colors">
@@ -37,10 +37,10 @@ export function CandidateTable({
                 </td>
                 <td className="p-4">
                   <div className="flex flex-col">
-                    <span className="font-semibold text-slate-200">
+                    <span className="font-medium text-slate-200">
                       {candidate.resume.candidateName || 'Unknown Candidate'}
                     </span>
-                    <span className="text-xs text-slate-500 max-w-[200px] truncate">
+                    <span className="text-xs text-slate-500 max-w-[200px] truncate mt-0.5">
                       {candidate.resume.fileName}
                     </span>
                   </div>
@@ -68,7 +68,7 @@ export function CandidateTable({
                   )}
                 </td>
                 <td className="p-4 pr-6 text-right">
-                  <button className="text-indigo-400 hover:text-indigo-300 transition-colors p-2 rounded-lg hover:bg-indigo-500/10">
+                  <button className="text-indigo-400 group-hover:text-indigo-300 transition-colors p-1.5 rounded-lg group-hover:bg-indigo-500/10">
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </td>

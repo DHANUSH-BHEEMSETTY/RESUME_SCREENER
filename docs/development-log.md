@@ -443,3 +443,24 @@ README.md                                         ← MODIFIED
 
 `fix: harden screening pipeline and error handling`
 
+---
+
+## Phase 10 — Final UI Polish
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- **Typography**: Replaced default sans-serif font with **Inter** (via Google Fonts) across the entire application for a more professional, highly legible B2B aesthetic.
+- **Visual Hierarchy & Colors**: Removed the flashy text gradient from the main headline and simplified the main CTA button.
+- **Animations**: Removed the "ping-pong" loading bar animation during processing, keeping a subtle, standard spinner instead to convey professional reliability.
+- **Component Polish**: 
+  - Subdued the hover effects on the `CandidateTable`.
+  - Removed heavy drop shadows on internal cards in `CandidateDetails` and replaced them with subtle borders and flat backgrounds.
+  - Standardized background opacities and border colors for the `ResumeDropzone` and `ScreeningSummaryCards` to maintain a cohesive `slate` dark theme.
+- **Testing**: Confirmed the UI remains fully responsive and builds successfully without errors.
+
+### Commit
+
+`feat(frontend): polish recruiter dashboard experience`
+

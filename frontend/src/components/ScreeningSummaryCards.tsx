@@ -31,8 +31,8 @@ export function ScreeningSummaryCards({ summary, topScore }: { summary: Screenin
 
 function Card({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="bg-slate-800/40 border border-slate-700/50 p-5 rounded-xl backdrop-blur-sm flex items-center gap-4">
-      <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
+    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex items-center gap-4">
+      <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
         {icon}
       </div>
       <div>

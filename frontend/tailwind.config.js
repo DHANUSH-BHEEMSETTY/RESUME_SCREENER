@@ -6,15 +6,9 @@ export default {
   ],
   theme: {
     extend: {
-      keyframes: {
-        'ping-pong': {
-          '0%, 100%': { transform: 'translateX(-25%)' },
-          '50%': { transform: 'translateX(125%)' },
-        }
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
       },
-      animation: {
-        'ping-pong': 'ping-pong 2s ease-in-out infinite',
-      }
     },
   },
   plugins: [],

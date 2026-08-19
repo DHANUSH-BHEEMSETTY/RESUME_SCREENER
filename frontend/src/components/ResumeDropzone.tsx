@@ -73,8 +73,8 @@ export function ResumeDropzone({
       <div
         className={cn(
           "relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl transition-all",
-          isDragging ? "border-indigo-500 bg-indigo-500/10" : "border-slate-700 bg-slate-900/50",
-          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-slate-800/50 hover:border-slate-600"
+          isDragging ? "border-indigo-500 bg-indigo-500/10" : "border-slate-800 bg-slate-900/50",
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-slate-800/50 hover:border-slate-700"
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}

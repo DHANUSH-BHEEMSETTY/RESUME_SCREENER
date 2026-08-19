@@ -71,7 +71,7 @@ function App() {
               </div>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium text-slate-200 rounded-lg transition-colors border border-slate-700"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium text-slate-200 rounded-lg transition-colors border border-slate-700 shadow-sm"
               >
                 New Screening
               </button>
@@ -115,10 +115,10 @@ function App() {
             
             <div className="text-center space-y-4 py-8">
               <h1 className="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">
-                Smart Candidate <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Screening</span>
+                Candidate Screening
               </h1>
               <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Upload your resumes and paste your job description. Our AI will deterministically evaluate, score, and rank each candidate for you.
+                Upload candidate resumes and provide a job description. The system will evaluate, score, and rank each candidate objectively.
               </p>
             </div>
 
@@ -149,16 +149,12 @@ function App() {
               <button
                 onClick={handleScreening}
                 disabled={isScreening || !jobDescription || files.length === 0}
-                className="relative flex items-center justify-center gap-3 w-full sm:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 disabled:shadow-none transition-all overflow-hidden group"
+                className="relative flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-medium rounded-lg shadow-sm transition-all overflow-hidden"
               >
                 {isScreening ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Analyzing Candidates...</span>
-                    {/* Progress bar animation */}
-                    <div className="absolute bottom-0 left-0 h-1 bg-indigo-400/50 w-full">
-                      <div className="h-full bg-indigo-200 w-1/2 animate-[ping-pong_2s_ease-in-out_infinite]" />
-                    </div>
                   </>
                 ) : (
                   <>

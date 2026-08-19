@@ -37,9 +37,9 @@ export function CandidateDetails({
         {/* Left Column - Scores & AI Justification */}
         <div className="lg:col-span-1 flex flex-col gap-6">
           {/* Main Score Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Sparkles className="w-24 h-24 text-indigo-500" />
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <Sparkles className="w-24 h-24 text-slate-400" />
             </div>
             
             <div className="flex flex-col items-center justify-center mb-6 relative z-10">
@@ -59,8 +59,8 @@ export function CandidateDetails({
           </div>
 
           {/* AI Justification */}
-          <div className="bg-slate-800/40 border border-indigo-500/30 rounded-xl p-5 shadow-lg relative overflow-hidden backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-3 text-indigo-300">
+          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-5 relative overflow-hidden backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-3 text-slate-300">
               <BrainCircuit className="w-5 h-5" />
               <h3 className="font-semibold">AI Justification</h3>
             </div>
@@ -78,7 +78,7 @@ export function CandidateDetails({
         <div className="lg:col-span-2 flex flex-col gap-6">
           
           {/* "Why this candidate?" - Explainable AI */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <h3 className="text-xl font-bold text-white mb-6 border-b border-slate-800 pb-3">Why this candidate?</h3>
             
             <div className="space-y-6">
@@ -87,7 +87,7 @@ export function CandidateDetails({
               {analysis.matchedSkills.length > 0 && (
                 <div className="space-y-4">
                   {analysis.matchedSkills.map((match, idx) => (
-                    <div key={idx} className="bg-slate-800/50 rounded-lg p-4 border border-emerald-500/20">
+                    <div key={idx} className="bg-slate-800/20 rounded-lg p-4 border border-slate-800">
                       <div className="flex items-center gap-2 mb-2">
                         <Check className="w-5 h-5 text-emerald-500" />
                         <span className="font-semibold text-slate-200">{match.skill}</span>
@@ -106,7 +106,7 @@ export function CandidateDetails({
               {analysis.preferredSkillsMatched.length > 0 && (
                 <div className="space-y-4">
                   {analysis.preferredSkillsMatched.map((match, idx) => (
-                    <div key={`pref-${idx}`} className="bg-slate-800/50 rounded-lg p-4 border border-emerald-500/20">
+                    <div key={`pref-${idx}`} className="bg-slate-800/20 rounded-lg p-4 border border-slate-800">
                       <div className="flex items-center gap-2 mb-2">
                         <Check className="w-5 h-5 text-emerald-500" />
                         <span className="font-semibold text-slate-200">{match.skill}</span>
@@ -125,7 +125,7 @@ export function CandidateDetails({
               {analysis.missingSkills.length > 0 && (
                 <div className="space-y-4">
                   {analysis.missingSkills.map((match, idx) => (
-                    <div key={`miss-${idx}`} className="bg-slate-800/30 rounded-lg p-4 border border-rose-500/20">
+                    <div key={`miss-${idx}`} className="bg-slate-800/20 rounded-lg p-4 border border-slate-800">
                       <div className="flex items-center gap-2 mb-2">
                         <X className="w-5 h-5 text-rose-500" />
                         <span className="font-semibold text-slate-200">{match.skill}</span>
