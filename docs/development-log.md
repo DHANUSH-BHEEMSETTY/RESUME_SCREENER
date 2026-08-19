@@ -310,3 +310,45 @@ backend/src/types/index.ts                    ← MODIFIED (MatchResult updated)
 ### Commit
 
 `feat(ai): add resume matching and scoring engine`
+
+---
+
+## Phase 6 — Batch Screening and Ranking
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- `backend/src/services/screeningPipeline.service.ts` — Orchestrates the full candidate screening pipeline. Takes a job description text and an array of PDF buffers. Runs extraction, matching, and scoring in parallel using `Promise.allSettled`.
+- **Ranking & Shortlisting**: Candidates are sorted descending by their deterministically calculated overall score. Candidates with a score >= the configurable threshold (default 75) are marked as shortlisted.
+- **Error Isolation**: Individual candidate failures (e.g. corrupted PDF or LLM error on one candidate) are caught and returned in a `failed` array without crashing the entire batch process.
+- `backend/src/types/index.ts` — Updated `ScreeningSummary` and `ScreeningResponse` to track `failed` candidates.
+- `backend/src/__tests__/screeningPipeline.test.ts` — 4 tests ensuring error isolation, correct ranking, and threshold application.
+
+### Files Added / Modified
+
+```
+backend/src/services/screeningPipeline.service.ts ← NEW
+backend/src/__tests__/screeningPipeline.test.ts   ← NEW
+backend/src/types/index.ts                        ← MODIFIED
+docs/testing.md                                   ← MODIFIED
+README.md                                         ← MODIFIED
+```
+
+### Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| `Promise.allSettled` | Batch screening is slow; a failure on resume 49/50 shouldn't invalidate the 48 successful parses. |
+| Threshold config | Allowing the threshold to be passed in `ScreeningOptions` makes the service flexible for different strictness levels. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | ✅ Zero errors |
+| `npm test` (all files) | ✅ 69/69 pass (across 5 test files) |
+
+### Commit
+
+`feat(screening): add candidate ranking and shortlisting`

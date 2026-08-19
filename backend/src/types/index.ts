@@ -98,12 +98,19 @@ export interface ScreeningSummary {
   total: number;
   shortlisted: number;
   screened: number;
+  failed: number;
   processingTimeMs: number;
+}
+
+export interface ScreeningError {
+  fileName: string;
+  error: string;
 }
 
 export interface ScreeningResponse {
   job: AnalyzedJob;
   candidates: ScoredCandidate[];
+  failed: ScreeningError[];
   summary: ScreeningSummary;
 }
 

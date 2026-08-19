@@ -34,7 +34,8 @@ npx vitest run --coverage             # With coverage report
 | `src/__tests__/jobAnalysis.test.ts` | 17 | ✅ All passing |
 | `src/__tests__/matchingEngine.test.ts` | 21 | ✅ All passing |
 | `src/__tests__/scoreCalculator.test.ts` | 12 | ✅ All passing |
-| **Total** | **65** | **✅ All passing** |
+| `src/__tests__/screeningPipeline.test.ts`| 4 | ✅ All passing |
+| **Total** | **69** | **✅ All passing** |
 
 ---
 

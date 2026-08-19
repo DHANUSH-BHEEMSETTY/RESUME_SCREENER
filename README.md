@@ -52,8 +52,8 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | Job description analysis (LLM) | ✅ Implemented |
 | Semantic resume-to-job matching (LLM) | ✅ Implemented |
 | Deterministic weighted scoring | ✅ Implemented |
-| Candidate ranking | 🔲 Planned |
-| Shortlisting with configurable threshold | 🔲 Planned |
+| Candidate ranking | ✅ Implemented |
+| Shortlisting with configurable threshold | ✅ Implemented |
 | Skill gap analysis | 🔲 Planned |
 | Written justification per candidate | 🔲 Planned |
 | Recruiter dashboard (React) | 🔲 Planned |
@@ -367,7 +367,7 @@ npm test
 npx vitest run --reporter=verbose
 ```
 
-**Current test status:** 65 tests passing across 4 test files.
+**Current test status:** 69 tests passing across 5 test files.
 
 ---
 
