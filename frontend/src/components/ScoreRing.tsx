@@ -1,4 +1,4 @@
-import { cn } from './Badge';
+import { cn } from '../utils/cn';
 
 export function ScoreRing({
   score,

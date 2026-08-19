@@ -46,8 +46,8 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 
 | Feature | Status |
 |---|---|
-| PDF resume upload (single and batch) | 🔲 Planned |
-| Job description text input | 🔲 Planned |
+| PDF resume upload (single and batch) | ✅ Implemented |
+| Job description text input | ✅ Implemented |
 | Structured resume data extraction (LLM) | ✅ Implemented |
 | Job description analysis (LLM) | ✅ Implemented |
 | Semantic resume-to-job matching (LLM) | ✅ Implemented |
@@ -57,7 +57,7 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | Skill gap analysis | ✅ Implemented |
 | Written justification per candidate | ✅ Implemented |
 | Recruiter dashboard (React) | ✅ Implemented |
-| Candidate detail view with score breakdown | 🔲 Planned |
+| Candidate detail view with score breakdown | ✅ Implemented |
 | REST API foundation (Express + TypeScript) | ✅ Implemented |
 | Route structure (`/api/health`, `/api/screen`, `/api/resumes`, `/api/jobs`) | ✅ Implemented |
 | Environment configuration with startup validation | ✅ Implemented |
@@ -158,7 +158,7 @@ Shortlist threshold: **≥ 75** (configurable via `SHORTLIST_THRESHOLD` env var)
 
 ## Project Structure
 
-> **Status:** Planned — not yet created
+> **Status:** ✅ Implemented
 
 ```
 resume_screener/
@@ -322,10 +322,10 @@ cp .env.example .env
 # Edit .env and set GEMINI_API_KEY to your Google Gemini API key
 npm run dev
 
-# 3. Frontend setup (new terminal) — 🔲 Planned
-# cd frontend
-# npm install
-# npm run dev
+# 3. Frontend setup (new terminal)
+cd frontend
+npm install
+npm run dev
 ```
 
 ---
@@ -350,7 +350,9 @@ npm run dev         # development with hot reload on port 3001
 npm run type-check  # TypeScript compilation check
 npm run build       # production build to dist/
 
-# Frontend — 🔲 Planned
+# Frontend (from resume_screener/frontend/)
+npm run dev         # development with hot reload on port 5173
+npm run build       # production build to dist/
 ```
 
 ---

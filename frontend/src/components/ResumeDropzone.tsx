@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
 import { UploadCloud, FileText, X } from 'lucide-react';
-import { cn } from './Badge';
+import { cn } from '../utils/cn';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export function ResumeDropzone({
   files,
@@ -31,7 +33,15 @@ export function ResumeDropzone({
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const pdfs = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-      onFilesChange([...files, ...pdfs]);
+      const validPdfs = pdfs.filter(f => f.size <= MAX_FILE_SIZE);
+      const newFiles = validPdfs.filter(f => !files.some(existing => existing.name === f.name && existing.size === f.size));
+      if (newFiles.length > 0) {
+        onFilesChange([...files, ...newFiles]);
+      } else if (pdfs.length > validPdfs.length) {
+        alert('Some files exceed the 5MB size limit.');
+      } else if (validPdfs.length > 0) {
+        alert('All dropped files have already been added.');
+      }
     }
   };
 
@@ -40,7 +50,15 @@ export function ResumeDropzone({
     if (disabled) return;
     if (e.target.files && e.target.files.length > 0) {
       const pdfs = Array.from(e.target.files).filter(f => f.type === 'application/pdf');
-      onFilesChange([...files, ...pdfs]);
+      const validPdfs = pdfs.filter(f => f.size <= MAX_FILE_SIZE);
+      const newFiles = validPdfs.filter(f => !files.some(existing => existing.name === f.name && existing.size === f.size));
+      if (newFiles.length > 0) {
+        onFilesChange([...files, ...newFiles]);
+      } else if (pdfs.length > validPdfs.length) {
+        alert('Some files exceed the 5MB size limit.');
+      } else if (validPdfs.length > 0) {
+        alert('All selected files have already been added.');
+      }
     }
   };
 

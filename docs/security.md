@@ -16,12 +16,12 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| `GEMINI_API_KEY` stored in `.env` file | 🔲 Planned |
-| `.env` excluded from Git via `.gitignore` | 🔲 Planned |
-| `.env.example` committed (keys redacted) | 🔲 Planned |
-| API key never logged | 🔲 Planned |
-| API key never returned in any API response | 🔲 Planned |
-| Startup validation fails if key is missing | 🔲 Planned |
+| `GEMINI_API_KEY` stored in `.env` file | ✅ Implemented |
+| `.env` excluded from Git via `.gitignore` | ✅ Implemented |
+| `.env.example` committed (keys redacted) | ✅ Implemented |
+| API key never logged | ✅ Implemented |
+| API key never returned in any API response | ✅ Implemented |
+| Startup validation fails if key is missing | ✅ Implemented |
 
 **Rule:** The API key must never appear in:
 - Source code
@@ -35,11 +35,11 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| Resumes processed in memory only (multer memory storage) | 🔲 Planned |
-| Resume raw text not written to log files | 🔲 Planned |
-| Resume content not returned beyond what is necessary | 🔲 Planned |
-| Candidate PII (name, email, phone) only returned in API response, not logged | 🔲 Planned |
-| No database persistence — data exists only for the lifetime of the request | 🔲 Planned |
+| Resumes processed in memory only (multer memory storage) | ✅ Implemented |
+| Resume raw text not written to log files | ✅ Implemented |
+| Resume content not returned beyond what is necessary | ✅ Implemented |
+| Candidate PII (name, email, phone) only returned in API response, not logged | ✅ Implemented |
+| No database persistence — data exists only for the lifetime of the request | ✅ Implemented |
 
 **Design principle:** The server processes resumes statelessly. Once a screening response is returned, no resume data is retained by the server.
 
@@ -49,11 +49,11 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| MIME type validation (only `application/pdf` accepted) | 🔲 Planned |
-| File size limit enforced (default 10 MB per file) | 🔲 Planned |
-| Maximum file count per request (20 files) | 🔲 Planned |
-| File contents validated by pdf-parse before LLM call | 🔲 Planned |
-| Multer configured with memory storage (no disk write) | 🔲 Planned |
+| MIME type validation (only `application/pdf` accepted) | ✅ Implemented |
+| File size limit enforced (default 10 MB per file) | ✅ Implemented |
+| Maximum file count per request (20 files) | ✅ Implemented |
+| File contents validated by pdf-parse before LLM call | ✅ Implemented |
+| Multer configured with memory storage (no disk write) | ✅ Implemented |
 
 ---
 
@@ -61,11 +61,11 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| All LLM responses validated against Zod schemas before use | 🔲 Planned |
-| Malformed JSON does not crash the server (caught and handled) | 🔲 Planned |
-| LLM output scores clamped to [0, 100] before formula | 🔲 Planned |
-| LLM timeouts handled gracefully | 🔲 Planned |
-| LLM errors return 503, not 500 with internal details | 🔲 Planned |
+| All LLM responses validated against Zod schemas before use | ✅ Implemented |
+| Malformed JSON does not crash the server (caught and handled) | ✅ Implemented |
+| LLM output scores clamped to [0, 100] before formula | ✅ Implemented |
+| LLM timeouts handled gracefully | ✅ Implemented |
+| LLM errors return 503, not 500 with internal details | ✅ Implemented |
 
 ---
 
@@ -74,7 +74,7 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 | Control | Status | Note |
 |---|---|---|
 | HTTPS | Not planned for local dev | Use a reverse proxy (nginx/Caddy) in production |
-| CORS | 🔲 Planned | Configured to allow frontend dev origin only |
+| CORS | ✅ Implemented | Configured to allow frontend dev origin only |
 
 ---
 
@@ -82,9 +82,9 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| `jobDescription` min/max length enforced | 🔲 Planned |
-| Request body size limits (Express `bodyParser`) | 🔲 Planned |
-| Unknown query parameters ignored | 🔲 Planned |
+| `jobDescription` min/max length enforced | ✅ Implemented |
+| Request body size limits (Express `bodyParser`) | ✅ Implemented |
+| Unknown query parameters ignored | ✅ Implemented |
 
 ---
 
@@ -92,10 +92,10 @@ Smart Resume Screener handles sensitive data including resumes (personal informa
 
 | Control | Status |
 |---|---|
-| Internal stack traces not exposed in API responses | 🔲 Planned |
-| All errors return structured `{ "error": "message" }` JSON | 🔲 Planned |
-| Global Express error handler catches unhandled exceptions | 🔲 Planned |
-| LLM provider errors translated to appropriate HTTP codes | 🔲 Planned |
+| Internal stack traces not exposed in API responses | ✅ Implemented |
+| All errors return structured `{ "error": "message" }` JSON | ✅ Implemented |
+| Global Express error handler catches unhandled exceptions | ✅ Implemented |
+| LLM provider errors translated to appropriate HTTP codes | ✅ Implemented |
 
 ---
 

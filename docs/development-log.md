@@ -426,3 +426,20 @@ README.md                                         ← MODIFIED
 
 `feat(frontend): add explainable candidate analysis`
 
+---
+
+## Phase 9 — QA and Security Audit
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- **Frontend Validations**: Added file deduplication by name/size to `ResumeDropzone.tsx` to prevent users from accidentally uploading the same resume multiple times. Also enforced a 5MB size limit warning on the client side.
+- **Frontend Refactor**: Fixed a React fast refresh linting warning in `Badge.tsx` by moving the `cn` utility function to a dedicated `utils/cn.ts` file.
+- **Backend Audit**: Verified that `.env` is properly ignored in Git, that `pdf-parse` correctly handles empty files (throws custom `PDFExtractionError`), that Multer has memory storage limits (`MAX_SIZE_BYTES`), and that no raw text from resumes or API keys are ever logged.
+- **Testing**: Confirmed that all 69 backend tests pass (`npm run test`) and both backend and frontend build successfully (`npm run build`).
+
+### Commit
+
+`fix: harden screening pipeline and error handling`
+
