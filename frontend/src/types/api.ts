@@ -50,6 +50,11 @@ export interface AnalyzedJob {
 
 export type Recommendation = 'STRONG_HIRE' | 'HIRE' | 'MAYBE' | 'REJECT';
 
+export interface SkillMatch {
+  skill: string;
+  evidence: string;
+}
+
 export interface MatchResult {
   // Component scores (0-100) — provided by LLM, clamped before use
   skillsScore: number;
@@ -59,9 +64,9 @@ export interface MatchResult {
   semanticScore: number;
 
   // Skill matching
-  matchedSkills: string[];           // skills in BOTH resume and job (required)
-  missingSkills: string[];           // required/preferred skills NOT in resume
-  preferredSkillsMatched: string[];  // preferred skills present in resume
+  matchedSkills: SkillMatch[];           // skills in BOTH resume and job (required)
+  missingSkills: SkillMatch[];           // required/preferred skills NOT in resume
+  preferredSkillsMatched: SkillMatch[];  // preferred skills present in resume
 
   // Qualitative analysis
   strengths: string[];

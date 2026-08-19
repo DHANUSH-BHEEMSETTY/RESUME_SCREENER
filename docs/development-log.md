@@ -404,3 +404,25 @@ README.md                                         ← MODIFIED
 ### Commit
 
 `feat(frontend): add recruiter screening dashboard`
+
+---
+
+## Phase 8 — Explainable Candidate Analysis
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- **Explainable Evidence**: Modified the LLM prompt and `MatchResult` schema to extract concrete evidence quotes for every matched, missing, and preferred skill. 
+- **Zod Schema Updates**: Replaced `string[]` arrays for skills with an array of `{ skill: string; evidence: string }` objects in `backend/src/validation/matchSchema.ts`.
+- **UI Redesign**: Replaced the simple pill badge lists in `CandidateDetails.tsx` with a new "Why this candidate?" structured UI layout that prominently displays the AI-extracted evidence for each skill.
+
+### Technical Decisions
+
+- By strictly asking the LLM for 1-2 sentence quotes directly from the resume for `evidence`, we prevent hallucinations while improving the explainability of the automated decision.
+- Migrating the arrays required a synchronized end-to-end type update using the `SkillMatch` interface in both `frontend/src/types/api.ts` and `backend/src/types/index.ts`.
+
+### Commit
+
+`feat(frontend): add explainable candidate analysis`
+

@@ -15,9 +15,9 @@ STRICT RULES — YOU MUST FOLLOW ALL OF THEM:
 1. Base ALL scores and analysis ONLY on the provided resume and job description data. No external knowledge.
 2. NEVER invent skills, experience, or qualifications not present in the resume.
 3. NEVER assume seniority, scope, or achievements unless explicitly stated.
-4. matchedSkills: list ONLY skills that appear in BOTH the candidate resume skills array AND the job's required or preferred skills. Exact or equivalent matches only.
-5. missingSkills: list required or preferred skills from the job that are NOT present in the resume skills array.
-6. preferredSkillsMatched: list ONLY skills that appear in BOTH the resume AND the job's preferredSkills array specifically.
+4. matchedSkills: list ONLY skills that appear in BOTH the candidate resume skills array AND the job's required or preferred skills. Exact or equivalent matches only. For each, extract a 1-2 sentence quote or summary as 'evidence' from the resume showing how they used it.
+5. missingSkills: list required or preferred skills from the job that are NOT present in the resume skills array. For each, set 'evidence' to a brief statement explaining it was not found.
+6. preferredSkillsMatched: list ONLY skills that appear in BOTH the resume AND the job's preferredSkills array specifically. For each, extract 'evidence' from the resume.
 7. strengths: provide 2–4 specific, evidence-based strengths. Each must cite specific resume evidence (e.g., "5 years of Node.js experience matching the 5+ year requirement").
 8. gaps: provide 2–4 specific, evidence-based gaps. Each must cite a specific missing or insufficient requirement.
 9. experienceAnalysis: compare the candidate's total experience years and relevance to the job's stated experience requirements. Be specific about years and domain.
@@ -95,9 +95,9 @@ Respond with a JSON object matching this EXACT schema:
   "educationScore": number,
   "certificationScore": number,
   "semanticScore": number,
-  "matchedSkills": string[],
-  "missingSkills": string[],
-  "preferredSkillsMatched": string[],
+  "matchedSkills": [{ "skill": string, "evidence": string }],
+  "missingSkills": [{ "skill": string, "evidence": string }],
+  "preferredSkillsMatched": [{ "skill": string, "evidence": string }],
   "strengths": string[],
   "gaps": string[],
   "experienceAnalysis": string,

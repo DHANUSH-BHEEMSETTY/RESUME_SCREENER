@@ -77,35 +77,69 @@ export function CandidateDetails({
         {/* Right Column - Deep Dive */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           
-          {/* Skills Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-500" />
-                Matched Skills
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {analysis.matchedSkills.length > 0 ? (
-                  analysis.matchedSkills.map(s => <Badge key={s} variant="success">{s}</Badge>)
-                ) : (
-                  <span className="text-xs text-slate-500">No required skills matched.</span>
-                )}
-                {analysis.preferredSkillsMatched.map(s => <Badge key={`pref-${s}`} variant="outline" className="border-emerald-500/30 text-emerald-400">{s} (Preferred)</Badge>)}
-              </div>
-            </div>
+          {/* "Why this candidate?" - Explainable AI */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md">
+            <h3 className="text-xl font-bold text-white mb-6 border-b border-slate-800 pb-3">Why this candidate?</h3>
+            
+            <div className="space-y-6">
+              
+              {/* Matched Skills */}
+              {analysis.matchedSkills.length > 0 && (
+                <div className="space-y-4">
+                  {analysis.matchedSkills.map((match, idx) => (
+                    <div key={idx} className="bg-slate-800/50 rounded-lg p-4 border border-emerald-500/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span className="font-semibold text-slate-200">{match.skill}</span>
+                        <Badge variant="success" className="ml-auto">Matched</Badge>
+                      </div>
+                      <div className="text-sm text-slate-400 pl-7 border-l-2 border-slate-700 ml-2 py-1">
+                        <span className="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Evidence</span>
+                        {match.evidence}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <X className="w-4 h-4 text-rose-500" />
-                Missing Skills
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {analysis.missingSkills.length > 0 ? (
-                  analysis.missingSkills.map(s => <Badge key={s} variant="danger">{s}</Badge>)
-                ) : (
-                  <span className="text-xs text-slate-500">No missing required skills.</span>
-                )}
-              </div>
+              {/* Preferred Skills */}
+              {analysis.preferredSkillsMatched.length > 0 && (
+                <div className="space-y-4">
+                  {analysis.preferredSkillsMatched.map((match, idx) => (
+                    <div key={`pref-${idx}`} className="bg-slate-800/50 rounded-lg p-4 border border-emerald-500/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Check className="w-5 h-5 text-emerald-500" />
+                        <span className="font-semibold text-slate-200">{match.skill}</span>
+                        <Badge variant="outline" className="ml-auto border-emerald-500/30 text-emerald-400">Preferred</Badge>
+                      </div>
+                      <div className="text-sm text-slate-400 pl-7 border-l-2 border-slate-700 ml-2 py-1">
+                        <span className="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Evidence</span>
+                        {match.evidence}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Missing Skills */}
+              {analysis.missingSkills.length > 0 && (
+                <div className="space-y-4">
+                  {analysis.missingSkills.map((match, idx) => (
+                    <div key={`miss-${idx}`} className="bg-slate-800/30 rounded-lg p-4 border border-rose-500/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <X className="w-5 h-5 text-rose-500" />
+                        <span className="font-semibold text-slate-200">{match.skill}</span>
+                        <Badge variant="danger" className="ml-auto">Missing</Badge>
+                      </div>
+                      <div className="text-sm text-slate-400 pl-7 border-l-2 border-slate-700 ml-2 py-1">
+                        <span className="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">Evidence</span>
+                        {match.evidence}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
             </div>
           </div>
 

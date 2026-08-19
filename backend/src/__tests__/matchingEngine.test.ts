@@ -79,9 +79,18 @@ function makeMatchResponse(overrides: Record<string, unknown> = {}): string {
     educationScore: 85,
     certificationScore: 90,
     semanticScore: 80,
-    matchedSkills: ['TypeScript', 'Node.js', 'PostgreSQL'],
-    missingSkills: ['REST API design'],
-    preferredSkillsMatched: ['GraphQL', 'Docker'],
+    matchedSkills: [
+      { skill: 'TypeScript', evidence: 'Used TS for 5 years.' },
+      { skill: 'Node.js', evidence: 'Built backends.' },
+      { skill: 'PostgreSQL', evidence: 'Managed DBs.' }
+    ],
+    missingSkills: [
+      { skill: 'REST API design', evidence: 'Not found.' }
+    ],
+    preferredSkillsMatched: [
+      { skill: 'GraphQL', evidence: 'Has GraphQL.' },
+      { skill: 'Docker', evidence: 'Uses Docker.' }
+    ],
     strengths: ['Strong TypeScript background', 'Meets experience requirement'],
     gaps: ['REST API design not explicitly listed'],
     experienceAnalysis: 'Candidate has 5+ years of relevant experience.',
@@ -124,14 +133,21 @@ describe('analyzeMatch', () => {
     it('populates matchedSkills and preferredSkillsMatched', async () => {
       mockComplete.mockResolvedValue(
         makeMatchResponse({
-          matchedSkills: ['TypeScript', 'Node.js', 'PostgreSQL'],
-          preferredSkillsMatched: ['GraphQL', 'Docker'],
+          matchedSkills: [
+            { skill: 'TypeScript', evidence: 'yep' },
+            { skill: 'Node.js', evidence: 'yep' },
+            { skill: 'PostgreSQL', evidence: 'yep' }
+          ],
+          preferredSkillsMatched: [
+            { skill: 'GraphQL', evidence: 'yep' },
+            { skill: 'Docker', evidence: 'yep' }
+          ],
         })
       );
 
       const result = await analyzeMatch(STRONG_RESUME, SAMPLE_JOB);
-      expect(result.matchedSkills).toContain('TypeScript');
-      expect(result.preferredSkillsMatched).toContain('GraphQL');
+      expect(result.matchedSkills[0].skill).toEqual('TypeScript');
+      expect(result.preferredSkillsMatched[0].skill).toEqual('GraphQL');
     });
   });
 
@@ -168,7 +184,12 @@ describe('analyzeMatch', () => {
           certificationScore: 0,
           semanticScore: 15,
           matchedSkills: [],
-          missingSkills: ['TypeScript', 'Node.js', 'PostgreSQL', 'REST API design'],
+          missingSkills: [
+            { skill: 'TypeScript', evidence: 'missing' },
+            { skill: 'Node.js', evidence: 'missing' },
+            { skill: 'PostgreSQL', evidence: 'missing' },
+            { skill: 'REST API design', evidence: 'missing' }
+          ],
           recommendation: 'REJECT',
           confidence: 40,
         })
@@ -178,7 +199,7 @@ describe('analyzeMatch', () => {
       expect(result.skillsScore).toBe(10);
       expect(result.recommendation).toBe('REJECT');
       expect(result.matchedSkills).toHaveLength(0);
-      expect(result.missingSkills).toContain('TypeScript');
+      expect(result.missingSkills.map(m => m.skill)).toContain('TypeScript');
     });
   });
 
@@ -188,15 +209,20 @@ describe('analyzeMatch', () => {
     it('lists missing required skills correctly', async () => {
       mockComplete.mockResolvedValue(
         makeMatchResponse({
-          matchedSkills: ['Node.js'],
-          missingSkills: ['TypeScript', 'PostgreSQL', 'REST API design'],
+          matchedSkills: [{ skill: 'Node.js', evidence: 'yep' }],
+          missingSkills: [
+            { skill: 'TypeScript', evidence: 'nope' },
+            { skill: 'PostgreSQL', evidence: 'nope' },
+            { skill: 'REST API design', evidence: 'nope' }
+          ],
           preferredSkillsMatched: [],
         })
       );
 
       const result = await analyzeMatch(AVERAGE_RESUME, SAMPLE_JOB);
-      expect(result.missingSkills).toContain('TypeScript');
-      expect(result.missingSkills).toContain('PostgreSQL');
+      const missingKeys = result.missingSkills.map(m => m.skill);
+      expect(missingKeys).toContain('TypeScript');
+      expect(missingKeys).toContain('PostgreSQL');
       expect(result.preferredSkillsMatched).toHaveLength(0);
     });
   });

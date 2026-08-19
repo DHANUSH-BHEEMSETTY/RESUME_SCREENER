@@ -20,9 +20,15 @@ export const MatchSchema = z.object({
   semanticScore: score,
 
   // Skill matching
-  matchedSkills: z.array(z.string()),
-  missingSkills: z.array(z.string()),
-  preferredSkillsMatched: z.array(z.string()),
+  matchedSkills: z.array(
+    z.object({ skill: z.string(), evidence: z.string() })
+  ),
+  missingSkills: z.array(
+    z.object({ skill: z.string(), evidence: z.string() })
+  ),
+  preferredSkillsMatched: z.array(
+    z.object({ skill: z.string(), evidence: z.string() })
+  ),
 
   // Qualitative analysis
   strengths: z.array(z.string()),
