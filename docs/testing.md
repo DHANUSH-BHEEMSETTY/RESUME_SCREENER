@@ -1,6 +1,36 @@
 # Testing Strategy
 
-> **Status:** Planned — tests will be written during Phase 9
+> **Phase 3 complete.** 15 unit tests pass for the resume extraction service.
+> Integration tests and remaining service tests are planned for Phase 9.
+
+---
+
+## Test Framework
+
+**Vitest** — compatible with TypeScript out of the box; fast execution; no separate compilation step.
+
+**Configuration:** [`backend/vitest.config.ts`](../backend/vitest.config.ts)
+**Setup file:** [`backend/src/__tests__/setup.ts`](../backend/src/__tests__/setup.ts) — sets required env vars before any module loads.
+
+---
+
+## Test Commands
+
+```bash
+# From resume_screener/backend/
+npm test                              # Run all tests once
+npx vitest run --reporter=verbose     # Verbose output with test names
+npx vitest                            # Watch mode
+npx vitest run --coverage             # With coverage report
+```
+
+---
+
+## Current Test Status
+
+| Test File | Tests | Status |
+|---|---|---|
+| `src/__tests__/resumeExtraction.test.ts` | 15 | ✅ All passing |
 
 ---
 

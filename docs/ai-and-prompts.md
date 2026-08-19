@@ -1,7 +1,7 @@
 # AI Design and Prompts
 
-> **Status:** Planned — prompts will be finalized during Phase 3–5 implementation.
-> This document reflects the intended design. Actual prompts will be updated to match the final implementation.
+> **Phase 3 complete.** Resume extraction LLM pipeline is implemented and tested.
+> Job description analysis and matching prompts are planned for Phases 4–5.
 
 ---
 
@@ -9,254 +9,225 @@
 
 Smart Resume Screener uses **Google Gemini 1.5 Flash** as its LLM provider.
 
-All LLM calls produce **structured JSON output** using Gemini's `responseMimeType: "application/json"` capability. This eliminates the need to parse free-form text and makes responses directly validatable with Zod schemas.
+All LLM calls produce **structured JSON output** using Gemini's `responseMimeType: "application/json"` configuration. This eliminates free-form text parsing and makes responses directly validatable with Zod schemas.
 
-The system uses **three separate prompts**:
+### Why Structured JSON Output?
 
-| Prompt | Purpose | Called |
-|---|---|---|
-| Resume Extraction | Raw text → structured candidate data | Once per resume |
-| Job Description Analysis | JD text → structured job criteria | Once per screening batch |
-| Matching Analysis | Resume + Job → scores + justification | Once per candidate |
+| Approach | Problem |
+|---|---|
+| Free-form text | Requires fragile regex/string parsing; brittle |
+| JSON in prompt only | Model may still add preamble or code fences |
+| `responseMimeType: "application/json"` | Forces JSON-only output at the model level; most reliable |
+
+Gemini's JSON mode constrains the model to produce syntactically valid JSON. Combined with Zod schema validation, this provides a two-layer safety net: the model produces valid JSON, and the schema ensures it matches our expected shape.
+
+---
+
+## Implementation Status
+
+| Prompt | Status |
+|---|---|
+| Resume Extraction | ✅ Implemented |
+| Job Description Analysis | 🔲 Planned (Phase 4) |
+| Matching Analysis | 🔲 Planned (Phase 5) |
 
 ---
 
 ## LLM Provider Abstraction
 
-**File:** `backend/src/llm/llmClient.ts` *(Planned)*
+**File:** [`backend/src/llm/llmClient.ts`](../backend/src/llm/llmClient.ts)
 
 ```typescript
-interface LLMProvider {
+export interface LLMProvider {
   complete(systemPrompt: string, userPrompt: string): Promise<string>;
-}
-
-class GeminiProvider implements LLMProvider {
-  // Uses @google/generative-ai SDK
-  // responseMimeType: "application/json"
-  // Retry on transient failures (up to 2 retries with 1s backoff)
 }
 ```
 
-Config via environment:
-- `GEMINI_API_KEY` — required
-- `LLM_MODEL` — defaults to `gemini-1.5-flash`
+The `llmClient` is exported as a singleton implementing `LLMProvider`. In production it uses `GeminiProvider`. In tests, the entire `llmClient` module is mocked via `vi.mock()` — no real API calls are ever made during testing.
+
+**Gemini configuration:**
+```typescript
+{
+  responseMimeType: 'application/json',
+  temperature: 0.1,   // Low — factual extraction, not creative
+  topP: 0.8,
+  maxOutputTokens: 4096,
+}
+```
+
+---
+
+## Retry and Timeout Strategy
+
+**File:** `backend/src/llm/llmClient.ts`
+
+| Parameter | Value |
+|---|---|
+| Max retries | 2 (3 total attempts) |
+| Retry delay | 1s × attempt number (exponential) |
+| Timeout per attempt | 45 seconds |
+| Retry conditions | Rate limit (429), network errors, timeouts, 5xx |
+| No-retry conditions | Auth errors, validation errors, non-transient failures |
+
+**Flow:**
+```
+LLM call attempt 1
+  ├─ Success → return text
+  ├─ Rate limit / network → wait 1s → attempt 2
+  │     ├─ Success → return text
+  │     ├─ Rate limit / network → wait 2s → attempt 3
+  │     │     ├─ Success → return text
+  │     │     └─ Any failure → throw LLMError
+  │     └─ Non-retryable → throw LLMError
+  └─ Timeout → wait 1s → retry (same flow)
+```
+
+---
+
+## Validation Strategy
+
+Every LLM response goes through three steps before it is used:
+
+```
+LLM raw string output
+    │
+    ├─ Step 1: safeJsonParse()
+    │   Strip markdown code fences (```json...```)
+    │   JSON.parse()
+    │   If null → throw LLMError("malformed JSON")
+    │
+    ├─ Step 2: Zod.safeParse(schema)
+    │   Validate shape, types, required fields
+    │   Strip unknown fields
+    │   If invalid → throw LLMError("schema validation failed")
+    │
+    └─ Step 3: Map to domain type
+        Flatten / rename fields
+        Return ParsedResume / AnalyzedJob / MatchResult
+```
+
+This ensures: no raw LLM output ever reaches application logic unvalidated.
 
 ---
 
 ## Safety Rules (Applied in All Prompts)
 
-The following rules are embedded into every prompt:
+The following rules are embedded in every system prompt:
 
-1. **Never invent information.** Only extract what is explicitly present in the provided text.
-2. **Return `null` for missing scalar fields** — never guess or infer.
-3. **Return `[]` for missing list fields** — never guess or infer.
-4. **Do not infer duration or dates** unless explicitly stated.
-5. **Base scores only on the provided resume and job description** — no external knowledge about companies or schools.
-6. **Respond only with valid JSON.** No preamble, no explanation outside the JSON structure.
+1. **Only extract what is explicitly stated** — never invent or infer
+2. **Return `null` for missing scalars** — name, email, phone, year
+3. **Return `[]` for missing arrays** — skills, education, experience, certifications
+4. **Never use external knowledge** — base scores only on the provided text
+5. **Normalize skill names** — "JS" → "JavaScript", "TS" → "TypeScript"
+6. **Copy duration exactly as written** — do not reformat dates
+7. **Respond with JSON only** — no preamble, no explanation outside JSON
 
 ---
 
-## Prompt 1 — Resume Extraction
+## Prompt 1 — Resume Extraction ✅ Implemented
 
-**File:** `backend/src/llm/prompts.ts` → `RESUME_EXTRACTION_PROMPT` *(Planned)*
+**Files:**
+- Prompt: [`backend/src/prompts/resumeExtraction.prompt.ts`](../backend/src/prompts/resumeExtraction.prompt.ts)
+- Schema: [`backend/src/validation/resumeSchema.ts`](../backend/src/validation/resumeSchema.ts)
+- Service: [`backend/src/services/resumeExtraction.service.ts`](../backend/src/services/resumeExtraction.service.ts)
 
 **Purpose:** Extract structured candidate information from raw PDF text.
 
-**System Prompt:**
-```
-You are a professional resume parser. Your task is to extract structured information
-from the provided resume text.
+### System Prompt
 
-Rules:
-- Only extract information that is explicitly stated in the text.
-- Never invent, guess, or infer information that is not present.
-- Return null for any scalar field that cannot be found.
-- Return an empty array [] for any list field that cannot be found.
-- Normalize skill names to their standard form (e.g., "JS" → "JavaScript").
-- For education entries, include all degrees found.
-- For work experience, list all positions in the order they appear.
-- Duration should be copied exactly as written in the resume (e.g., "Jan 2021 – Present").
-- Respond ONLY with valid JSON matching the specified schema.
+```
+You are a professional resume parser. Your sole task is to extract structured information from resume text.
+
+STRICT RULES — YOU MUST FOLLOW ALL OF THEM:
+1. ONLY extract information explicitly stated in the provided text.
+2. NEVER invent, guess, assume, or infer any field value.
+3. NEVER use your general knowledge about companies, universities, or technologies.
+4. If a field is not found in the text: return null for scalar fields, return [] for arrays.
+5. Normalize skill names to their standard/official form (e.g., "JS" → "JavaScript", "TS" → "TypeScript").
+6. For experience entries, copy duration exactly as written.
+7. Extract ALL education degrees found in the text.
+8. Extract ALL work experience entries found in the text, in the order they appear.
+9. For certifications: only include formal credentials explicitly listed.
+10. Do NOT add any explanation, commentary, or text outside the JSON structure.
+11. Respond ONLY with valid JSON that matches the required schema exactly.
 ```
 
-**User Prompt:**
+### User Prompt
+
 ```
 Extract structured information from the following resume text.
 
 RESUME TEXT:
+---
 {rawResumeText}
+---
 
-Respond with a JSON object matching this exact schema:
+Respond with a JSON object that matches this EXACT schema:
 {
-  "candidateName": string | null,
-  "email": string | null,
-  "phone": string | null,
+  "candidate": {
+    "name": string | null,
+    "email": string | null,
+    "phone": string | null
+  },
   "skills": string[],
   "education": [
-    {
-      "degree": string,
-      "institution": string,
-      "year": string | null
-    }
+    { "degree": string, "institution": string, "year": string | null }
   ],
-  "workExperience": [
-    {
-      "title": string,
-      "company": string,
-      "duration": string,
-      "description": string
-    }
+  "experience": [
+    { "title": string, "company": string, "duration": string, "description": string }
   ],
   "certifications": string[]
 }
 ```
 
-**Validation:** `resumeSchema.ts` (Zod) *(Planned)*
+### Output Schema (Zod)
+
+```typescript
+ResumeExtractionSchema = z.object({
+  candidate: z.object({
+    name: z.string().nullable(),
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+  }),
+  skills: z.array(z.string()),
+  education: z.array(z.object({
+    degree: z.string().min(1),
+    institution: z.string().min(1),
+    year: z.string().nullable(),
+  })),
+  experience: z.array(z.object({
+    title: z.string().min(1),
+    company: z.string().min(1),
+    duration: z.string().min(1),
+    description: z.string(),
+  })),
+  certifications: z.array(z.string()),
+})
+```
+
+### Mapping
+
+The LLM output uses `experience` and a nested `candidate` object. The service maps these to the `ParsedResume` domain type:
+- `candidate.name` → `candidateName`
+- `experience[]` → `workExperience[]`
 
 ---
 
-## Prompt 2 — Job Description Analysis
-
-**File:** `backend/src/llm/prompts.ts` → `JD_ANALYSIS_PROMPT` *(Planned)*
-
-**Purpose:** Parse a job description into structured hiring criteria.
-
-**System Prompt:**
-```
-You are an expert job description analyst. Your task is to extract structured hiring
-criteria from the provided job description.
-
-Rules:
-- Separate "required" skills (must-have) from "preferred" skills (nice-to-have).
-  If the JD does not make this distinction, place all skills in requiredSkills.
-- Extract the role title exactly as written.
-- For requiredExperience, capture the years and type (e.g., "5+ years of software engineering").
-- For educationRequirements, capture the stated minimum education level.
-- Certifications are only those explicitly mentioned.
-- Keywords are meaningful technical or domain terms from the JD.
-- Respond ONLY with valid JSON matching the specified schema.
-```
-
-**User Prompt:**
-```
-Analyze the following job description and extract structured hiring criteria.
-
-JOB DESCRIPTION:
-{jobDescriptionText}
-
-Respond with a JSON object matching this exact schema:
-{
-  "roleTitle": string,
-  "requiredSkills": string[],
-  "preferredSkills": string[],
-  "requiredExperience": string,
-  "educationRequirements": string,
-  "certifications": string[],
-  "responsibilities": string[],
-  "keywords": string[]
-}
-```
-
-**Validation:** `jobSchema.ts` (Zod) *(Planned)*
+## Prompt 2 — Job Description Analysis 🔲 Planned (Phase 4)
 
 ---
 
-## Prompt 3 — Matching Analysis
-
-**File:** `backend/src/llm/prompts.ts` → `MATCHING_PROMPT` *(Planned)*
-
-**Purpose:** Evaluate a candidate against the job description and produce component scores with justification.
-
-**System Prompt:**
-```
-You are an expert technical recruiter. Your task is to evaluate a candidate resume
-against a job description and provide a structured analysis.
-
-Rules:
-- Base all scores and analysis ONLY on the provided resume and job description.
-- Do NOT use external knowledge about companies, universities, or technologies.
-- Skills score (0–100): How well do the candidate's skills match required + preferred skills?
-  Weight required skills more heavily than preferred skills.
-- Experience score (0–100): How well does the candidate's experience (years, relevance, seniority)
-  match the job's stated requirements?
-- Education score (0–100): How well does the candidate's education meet the stated requirements?
-  A matching degree scores 100; a related field scores 70–85; no degree scores 0–30.
-- Certification score (0–100): 100 if all required certifications match, proportionally lower otherwise.
-  If no certifications are required, score 70 as neutral.
-- Semantic fit score (0–100): Overall contextual alignment — industry background, role relevance,
-  vocabulary match, tone of experience.
-- matchedSkills: only list skills present in BOTH the resume and the job description.
-- missingSkills: list required or preferred skills NOT found in the resume.
-- strengths: 2–4 specific, evidence-based strengths relevant to this role.
-- gaps: 2–4 specific, evidence-based gaps relevant to this role.
-- recommendation must be one of: STRONG_HIRE, HIRE, MAYBE, REJECT.
-- justification must be 2–4 sentences explaining the recommendation using specific evidence.
-- confidence: HIGH if resume is detailed and complete; MEDIUM if some fields are vague;
-  LOW if the resume is sparse or unreadable.
-- Respond ONLY with valid JSON matching the specified schema.
-```
-
-**User Prompt:**
-```
-Evaluate this candidate against the job description.
-
-CANDIDATE RESUME (structured):
-{parsedResumeJson}
-
-JOB DESCRIPTION (structured):
-{analyzedJobJson}
-
-Respond with a JSON object matching this exact schema:
-{
-  "matchedSkills": string[],
-  "missingSkills": string[],
-  "strengths": string[],
-  "gaps": string[],
-  "experienceAnalysis": string,
-  "educationAnalysis": string,
-  "skillsScore": number,
-  "experienceScore": number,
-  "educationScore": number,
-  "certificationScore": number,
-  "semanticFitScore": number,
-  "recommendation": "STRONG_HIRE" | "HIRE" | "MAYBE" | "REJECT",
-  "justification": string,
-  "confidence": "HIGH" | "MEDIUM" | "LOW"
-}
-```
-
-**Validation:** `matchSchema.ts` (Zod) *(Planned)*
-
----
-
-## Error Handling Strategy
-
-```
-LLM call
-  │
-  ├─► Success → Zod.parse → OK
-  │
-  ├─► JSON parse error → retry once (with 1s delay)
-  │       └─► Still fails → throw LLMValidationError
-  │
-  ├─► Zod validation failure → throw LLMValidationError
-  │
-  ├─► Network timeout → throw LLMTimeoutError
-  │
-  └─► Rate limit (429) → retry with exponential backoff (max 2 retries)
-```
+## Prompt 3 — Matching Analysis 🔲 Planned (Phase 5)
 
 ---
 
 ## Score Clamping
 
-All LLM-produced component scores are **clamped to [0, 100]** before being passed to the scoring formula:
+All LLM-produced component scores will be **clamped to [0, 100]** before the scoring formula is applied:
 
 ```typescript
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 ```
-
-This protects against hallucinated out-of-range values.
 
 ---
 
@@ -264,8 +235,10 @@ This protects against hallucinated out-of-range values.
 
 | Decision | Rationale |
 |---|---|
-| Structured JSON output | Eliminates text parsing; directly Zod-validatable |
+| Structured JSON mode | Eliminates text parsing; directly Zod-validatable |
 | Three separate prompts | Single-responsibility; easier to debug and tune individually |
-| LLM provides component scores, not overall score | Ensures deterministic, consistent final scoring |
+| LLM provides component scores, not overall score | Deterministic, consistent final scoring |
 | System + user prompt separation | System prompt sets permanent behavior; user prompt provides per-call data |
 | Safety rules in every prompt | Prevents hallucination regardless of which prompt is called |
+| `safeJsonParse` strips code fences | Some Gemini responses wrap JSON in markdown; this makes extraction robust |
+| Low temperature (0.1) | Factual extraction — reduces creativity, reduces hallucination |

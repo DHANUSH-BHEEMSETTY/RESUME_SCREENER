@@ -146,3 +146,66 @@ backend/
 ### Commit
 
 `feat(backend): add express api foundation`
+
+---
+
+## Phase 2+3 — PDF Extraction and Structured Resume AI Extraction
+
+**Date:** 2026-08-19  
+*(Phases combined: PDF extraction was implemented as a prerequisite for resume extraction)*
+
+### Implemented
+
+**Phase 2 — PDF Extraction**
+- `backend/src/services/pdfExtractor.ts` — wraps `pdf-parse`; validates minimum text length (50 chars); throws `PDFExtractionError` on failure; never logs resume content
+
+**Phase 3 — LLM Resume Extraction**
+- `backend/src/llm/llmClient.ts` — `LLMProvider` interface + `GeminiProvider` implementation; JSON mode (`responseMimeType: "application/json"`); temperature 0.1; retry (max 2, exponential backoff); 45s timeout per attempt
+- `backend/src/prompts/resumeExtraction.prompt.ts` — 11-rule system prompt + user prompt template with schema specification
+- `backend/src/validation/resumeSchema.ts` — Zod schema for LLM output; nullable scalars; typed arrays; unknown fields stripped
+- `backend/src/services/resumeExtraction.service.ts` — orchestrates LLM call → JSON parse → Zod validate → domain type mapping; strips markdown code fences; detailed error logging
+- `backend/vitest.config.ts` — Vitest configuration with node environment and setup file
+- `backend/src/__tests__/setup.ts` — sets env vars before module import to prevent startup validation failure in tests
+- `backend/src/__tests__/resumeExtraction.test.ts` — 15 tests: happy path, null/empty fields, markdown fence stripping, error handling (malformed JSON, schema failure, LLM errors), schema edge cases
+
+### Files Added
+
+```
+backend/src/llm/llmClient.ts
+backend/src/prompts/resumeExtraction.prompt.ts
+backend/src/validation/resumeSchema.ts
+backend/src/services/pdfExtractor.ts
+backend/src/services/resumeExtraction.service.ts
+backend/vitest.config.ts
+backend/src/__tests__/setup.ts
+backend/src/__tests__/resumeExtraction.test.ts
+```
+
+### Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| `responseMimeType: "application/json"` | Forces syntactically valid JSON at model level; removes need for text parsing |
+| Temperature 0.1 | Factual extraction — reduces creativity, reduces hallucination risk |
+| Nested `candidate` object in LLM prompt | Cleaner schema; explicitly groups contact fields; mapped to flat `ParsedResume` in service layer |
+| `safeJsonParse` strips code fences | Gemini occasionally wraps JSON in markdown blocks despite JSON mode; defensive stripping makes extraction robust |
+| Two-layer validation (JSON parse + Zod) | LLM JSON mode guarantees syntax; Zod guarantees schema shape. Both layers needed. |
+| `vi.mock` for LLM client | Enables fast, deterministic tests with no API calls; tests service logic not LLM behavior |
+| Singleton `llmClient` export | Easy to replace with mock in tests; avoids re-instantiating SDK on every call |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | ✅ Zero errors |
+| `npm test` | ✅ 15/15 tests pass |
+
+### Known Limitations
+
+- PDF extraction doesn't handle scanned image PDFs (no OCR)
+- LLM tests use mocks — real API accuracy tested manually
+- Phase 2 PDF extractor not independently tested (covered by integration in Phase 9)
+
+### Commit
+
+`feat(ai): add structured resume extraction`

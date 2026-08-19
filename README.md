@@ -48,7 +48,7 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 |---|---|
 | PDF resume upload (single and batch) | 🔲 Planned |
 | Job description text input | 🔲 Planned |
-| Structured resume data extraction (LLM) | 🔲 Planned |
+| Structured resume data extraction (LLM) | ✅ Implemented |
 | Job description analysis (LLM) | 🔲 Planned |
 | Semantic resume-to-job matching (LLM) | 🔲 Planned |
 | Deterministic weighted scoring | 🔲 Planned |
@@ -63,9 +63,15 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | Environment configuration with startup validation | ✅ Implemented |
 | Global error handling (custom error classes) | ✅ Implemented |
 | PDF upload middleware (multer, memory storage) | ✅ Implemented |
+| PDF text extraction (pdf-parse) | ✅ Implemented |
+| LLM provider abstraction (Gemini 1.5 Flash, JSON mode) | ✅ Implemented |
+| Resume extraction prompt with safety rules | ✅ Implemented |
+| Zod schema validation for LLM responses | ✅ Implemented |
+| LLM retry logic (2 retries, exponential backoff) | ✅ Implemented |
+| LLM timeout handling (45s per attempt) | ✅ Implemented |
 | Request validation for `/api/screen` | ✅ Implemented |
-| LLM response validation (Zod) | 🔲 Planned |
-| LLM error handling and retry | 🔲 Planned |
+| LLM response validation (Zod) | ✅ Implemented |
+| LLM error handling and retry | ✅ Implemented |
 
 ---
 
@@ -352,6 +358,16 @@ npm run build       # production build to dist/
 ## Testing
 
 See [`docs/testing.md`](docs/testing.md) for strategy and commands.
+
+```bash
+# Run tests (from resume_screener/backend/)
+npm test
+
+# Run with verbose output
+npx vitest run --reporter=verbose
+```
+
+**Current test status:** 15 tests passing across 1 test file.
 
 ---
 
