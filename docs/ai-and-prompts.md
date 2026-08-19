@@ -29,7 +29,7 @@ Gemini's JSON mode constrains the model to produce syntactically valid JSON. Com
 |---|---|
 | Resume Extraction | ✅ Implemented |
 | Job Description Analysis | ✅ Implemented |
-| Matching Analysis | 🔲 Planned (Phase 5) |
+| Matching Analysis | ✅ Implemented |
 
 ---
 
@@ -302,7 +302,73 @@ This prevents unnecessary LLM calls on garbage input and protects against prompt
 
 ---
 
-## Prompt 3 — Matching Analysis 🔲 Planned (Phase 5)
+## Prompt 3 — Matching Analysis ✅ Implemented
+
+**Files:**
+- Prompt: [`backend/src/prompts/matching.prompt.ts`](../backend/src/prompts/matching.prompt.ts)
+- Schema: [`backend/src/validation/matchSchema.ts`](../backend/src/validation/matchSchema.ts)
+- Service: [`backend/src/services/matchingEngine.service.ts`](../backend/src/services/matchingEngine.service.ts)
+- Scorer: [`backend/src/services/scoreCalculator.ts`](../backend/src/services/scoreCalculator.ts)
+
+**Purpose:** Evaluate one resume against one `AnalyzedJob`. Returns component scores and written analysis. Called **once per candidate** per batch. The overall score is then computed deterministically by `scoreCalculator.ts`.
+
+**Key design — LLM never decides the final score.** The LLM provides component scores (0–100) and written analysis. The final overall score is always computed by the backend using the fixed weighted formula.
+
+### Scoring Formula (Deterministic)
+
+```
+overallScore = round(
+  skillsScore     × 0.45   (45%)
+  experienceScore × 0.30   (30%)
+  educationScore  × 0.10   (10%)
+  certScore       × 0.05   (5%)
+  semanticScore   × 0.10   (10%)
+)
+```
+
+All LLM component scores are **clamped to [0, 100]** before the formula runs.
+
+### System Prompt (excerpt)
+
+```
+You are an expert technical recruiter performing a structured candidate evaluation.
+Your task is to evaluate a candidate's resume against a job description.
+
+STRICT RULES:
+1. Base ALL scores and analysis ONLY on the provided resume and job description.
+2. NEVER invent skills, experience, or qualifications.
+4. matchedSkills: ONLY skills in BOTH the resume AND job required/preferred lists.
+5. missingSkills: required or preferred skills NOT present in the resume.
+...
+11. Scores must be integers from 0 to 100. Use the scoring guidelines.
+12. recommendation must be: STRONG_HIRE, HIRE, MAYBE, or REJECT.
+13. justification: 2–4 sentences with specific evidence from resume and JD.
+14. confidence: 0–100 — how complete/reliable is the resume data?
+```
+
+See the full scoring guidelines per component in [`matching.prompt.ts`](../backend/src/prompts/matching.prompt.ts).
+
+### Output Schema (Zod)
+
+```typescript
+MatchSchema = z.object({
+  skillsScore: z.number().int().min(0).max(100),
+  experienceScore: z.number().int().min(0).max(100),
+  educationScore: z.number().int().min(0).max(100),
+  certificationScore: z.number().int().min(0).max(100),
+  semanticScore: z.number().int().min(0).max(100),
+  matchedSkills: z.array(z.string()),
+  missingSkills: z.array(z.string()),
+  preferredSkillsMatched: z.array(z.string()),
+  strengths: z.array(z.string()),
+  gaps: z.array(z.string()),
+  experienceAnalysis: z.string(),
+  educationAnalysis: z.string(),
+  recommendation: z.enum(['STRONG_HIRE', 'HIRE', 'MAYBE', 'REJECT']),
+  justification: z.string().min(1),
+  confidence: z.number().int().min(0).max(100),
+})
+```
 
 ---
 

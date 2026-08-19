@@ -258,3 +258,55 @@ backend/src/types/index.ts                    ← MODIFIED (AnalyzedJob type upd
 ### Commit
 
 `feat(ai): add job description analysis`
+
+---
+
+## Phase 5 — AI Matching and Deterministic Scoring
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- `backend/src/prompts/matching.prompt.ts` — 16-rule system prompt + user prompt; requests component scores (0–100) and written evidence-based analysis (strengths, gaps, justification); ensures explainability
+- `backend/src/validation/matchSchema.ts` — strict Zod schema for matching analysis; scores validated as integers [0, 100]; recommendation as enum
+- `backend/src/services/scoreCalculator.ts` — fixed deterministic weighted formula for overall score; clamps LLM component scores to [0, 100] to prevent hallucinated inputs
+- `backend/src/services/matchingEngine.service.ts` — calls LLM with resume+JD JSON, extracts code fences, validates with Zod, and maps to `MatchResult`
+- `backend/src/__tests__/matchingEngine.test.ts` — 21 tests: strong/average/weak candidates, missing skills/experience, field mapping, code fence stripping, error handling
+- `backend/src/__tests__/scoreCalculator.test.ts` — 20 tests: formula correctness, weight verification, rounding, clamping, shortlist boundary
+- `docs/scoring.md` — detailed breakdown of scoring methodology, component definitions, weight rationale, and deterministic nature
+
+### Files Added / Modified
+
+```
+backend/src/prompts/matching.prompt.ts        ← NEW
+backend/src/validation/matchSchema.ts         ← NEW
+backend/src/services/matchingEngine.service.ts ← NEW
+backend/src/services/scoreCalculator.ts       ← NEW
+backend/src/__tests__/matchingEngine.test.ts  ← NEW
+backend/src/__tests__/scoreCalculator.test.ts ← NEW
+backend/src/types/index.ts                    ← MODIFIED (MatchResult updated)
+```
+
+### Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| Deterministic final scoring | The backend always controls the final score calculation via fixed weights, guaranteeing reproducibility and preventing LLM hallucination of final scores. |
+| Clamping LLM score outputs | `Math.max(0, Math.min(100, n))` protects the calculation formula from edge-case LLM failures (e.g., returning 105 or -10) |
+| Evidence-based analysis fields | Prompts specifically request strengths, gaps, and justification with citations from the text to make decisions fully explainable |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | ✅ Zero errors |
+| `npm test` (all files) | ✅ 65/65 pass (across 4 test files) |
+
+### Known Limitations
+
+- LLM tests are mocked — real semantic evaluation accuracy needs manual verification
+- Scoring weights are hardcoded — could be exposed to config later if needed
+
+### Commit
+
+`feat(ai): add resume matching and scoring engine`

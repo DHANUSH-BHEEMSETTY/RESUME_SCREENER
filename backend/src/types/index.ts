@@ -49,23 +49,30 @@ export interface AnalyzedJob {
 // ---- Matching / scoring types ------------------------------
 
 export type Recommendation = 'STRONG_HIRE' | 'HIRE' | 'MAYBE' | 'REJECT';
-export type Confidence = 'HIGH' | 'MEDIUM' | 'LOW';
 
 export interface MatchResult {
-  matchedSkills: string[];
-  missingSkills: string[];
-  strengths: string[];
-  gaps: string[];
-  experienceAnalysis: string;
-  educationAnalysis: string;
+  // Component scores (0-100) — provided by LLM, clamped before use
   skillsScore: number;
   experienceScore: number;
   educationScore: number;
   certificationScore: number;
-  semanticFitScore: number;
+  semanticScore: number;
+
+  // Skill matching
+  matchedSkills: string[];           // skills in BOTH resume and job (required)
+  missingSkills: string[];           // required/preferred skills NOT in resume
+  preferredSkillsMatched: string[];  // preferred skills present in resume
+
+  // Qualitative analysis
+  strengths: string[];
+  gaps: string[];
+  experienceAnalysis: string;
+  educationAnalysis: string;
+
+  // Decision
   recommendation: Recommendation;
   justification: string;
-  confidence: Confidence;
+  confidence: number;  // 0-100: how complete/reliable is the resume data?
 }
 
 export interface CandidateScores {
