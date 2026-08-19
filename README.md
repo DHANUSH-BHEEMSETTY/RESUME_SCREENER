@@ -54,9 +54,9 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | Deterministic weighted scoring | ✅ Implemented |
 | Candidate ranking | ✅ Implemented |
 | Shortlisting with configurable threshold | ✅ Implemented |
-| Skill gap analysis | 🔲 Planned |
-| Written justification per candidate | 🔲 Planned |
-| Recruiter dashboard (React) | 🔲 Planned |
+| Skill gap analysis | ✅ Implemented |
+| Written justification per candidate | ✅ Implemented |
+| Recruiter dashboard (React) | ✅ Implemented |
 | Candidate detail view with score breakdown | 🔲 Planned |
 | REST API foundation (Express + TypeScript) | ✅ Implemented |
 | Route structure (`/api/health`, `/api/screen`, `/api/resumes`, `/api/jobs`) | ✅ Implemented |

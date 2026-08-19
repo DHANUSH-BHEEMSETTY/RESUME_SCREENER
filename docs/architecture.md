@@ -22,7 +22,7 @@
 | Matching engine | 🔲 Planned (Phase 5) |
 | Score calculator | 🔲 Planned (Phase 5) |
 | Ranker | 🔲 Planned (Phase 6) |
-| React frontend | 🔲 Planned (Phase 7) |
+| React frontend | ✅ Implemented |
 
 ---
 
@@ -32,6 +32,14 @@ Smart Resume Screener uses a clean, two-tier architecture:
 
 - **Backend** — Node.js + Express REST API that handles PDF extraction, LLM calls, scoring, and ranking
 - **Frontend** — React + Vite SPA that provides the recruiter-facing dashboard
+
+### Frontend (`/frontend`) - ✅ Implemented
+
+Built with **React**, **Vite**, **TypeScript**, and **Tailwind CSS**.
+- **`src/App.tsx`**: State orchestration and dashboard layout.
+- **`src/api/client.ts`**: Typed Axios client connecting to backend.
+- **`src/components/`**: Reusable UI elements (`JobDescriptionInput`, `ResumeDropzone`, `CandidateTable`, `CandidateDetails`, `ScoreRing`).
+- **`src/types/api.ts`**: Shared types bridging backend responses.
 
 Communication between tiers is via a single REST endpoint (`POST /api/screen`).
 

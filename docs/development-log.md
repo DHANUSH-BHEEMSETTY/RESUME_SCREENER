@@ -352,3 +352,55 @@ README.md                                         ← MODIFIED
 ### Commit
 
 `feat(screening): add candidate ranking and shortlisting`
+
+---
+
+## Phase 7 — Recruiter Dashboard
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- **Frontend React Application**: Initialized a Vite + React + TypeScript project in `/frontend`.
+- **Styling**: Configured Tailwind CSS v3 with a premium dark-mode aesthetic (slate backgrounds, glassmorphism, indigo accents).
+- **API Client**: Created `frontend/src/api/client.ts` using Axios to communicate with `POST /api/screen`.
+- **Backend Fix**: Updated `backend/src/controllers/screeningController.ts` to actually invoke the screening pipeline instead of returning a 501 stub.
+- **UI Components**:
+  - `Navbar`, `JobDescriptionInput`, `ResumeDropzone` for candidate input.
+  - `ScreeningSummaryCards`, `CandidateTable` for high-level result overviews.
+  - `CandidateDetails` for deep dives into AI justification, strengths, gaps, and score rings.
+  - `ScoreRing` and `Badge` for data visualization.
+- **State Management**: Orchestrated flow in `App.tsx` handling loading states, errors, and conditional rendering of results vs. candidate details.
+
+### Files Added / Modified
+
+```
+frontend/ (Vite initialization & dependencies)
+frontend/src/api/client.ts                        ← NEW
+frontend/src/components/*                         ← NEW
+frontend/src/types/api.ts                         ← NEW (copied from backend)
+frontend/src/App.tsx                              ← MODIFIED
+frontend/src/index.css                            ← MODIFIED
+backend/src/controllers/screeningController.ts    ← MODIFIED
+docs/architecture.md                              ← MODIFIED
+README.md                                         ← MODIFIED
+```
+
+### Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| Single Page State (No Router) | Given the limited scope of the dashboard (Input -> Results -> Details), managing state in `App.tsx` via conditional rendering is cleaner than setting up React Router. |
+| `import type` | Enabled strict type isolation using Vite's `verbatimModuleSyntax` config to ensure no unused imports affect the build. |
+| Copied Shared Types | Rather than linking the backend workspace directly, copying `index.ts` to `api.ts` keeps the frontend strictly separated without complex build configurations. |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| Frontend Build (`vite build`) | ✅ Succeeded |
+| TypeScript check (`tsc`) | ✅ Zero errors |
+
+### Commit
+
+`feat(frontend): add recruiter screening dashboard`

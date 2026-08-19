@@ -1,18 +1,28 @@
 import { Request, Response, NextFunction } from 'express';
 import { ValidationError } from '../middleware/errorHandler';
+import { runScreeningPipeline, ResumeUpload } from '../services/screeningPipeline.service';
+import { ScreeningOptions } from '../types';
 
 /**
  * POST /api/screen
  *
- * Stub — Phase 1 foundation only.
- * Full implementation in Phase 5 (matching engine).
- * Returns 501 Not Implemented until pipeline is built.
+ * Accepts multipart/form-data with PDF resumes and a job description.
+ * Runs the full screening pipeline and returns ranked candidates.
  */
-export function screenResumes(req: Request, res: Response, next: NextFunction): void {
+export async function screenResumes(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    // Basic request validation (full validation in Phase 5)
     const files = req.files as Express.Multer.File[] | undefined;
     const jobDescription = req.body.jobDescription as string | undefined;
+    
+    // Parse options if provided
+    let options: ScreeningOptions | undefined;
+    if (req.body.options) {
+      try {
+        options = JSON.parse(req.body.options);
+      } catch (err) {
+        throw new ValidationError('Invalid JSON in options field', 'Field: options');
+      }
+    }
 
     if (!files || files.length === 0) {
       throw new ValidationError('At least one resume PDF is required.', 'Field: resumes');
@@ -29,18 +39,18 @@ export function screenResumes(req: Request, res: Response, next: NextFunction): 
       );
     }
 
-    // Placeholder response — pipeline not yet implemented
-    res.status(501).json({
-      error: 'Screening pipeline not yet implemented.',
-      message: 'Phase 1 validation only. Full screening will be available in Phase 5.',
-      receivedFiles: files.map((f) => ({
-        name: f.originalname,
-        sizeBytes: f.size,
-        mimeType: f.mimetype,
-      })),
-      jobDescriptionLength: jobDescription.trim().length,
-    });
+    // Map Express.Multer.File to our ResumeUpload interface
+    const resumes: ResumeUpload[] = files.map(file => ({
+      fileName: file.originalname,
+      buffer: file.buffer
+    }));
+
+    // Run the pipeline!
+    const response = await runScreeningPipeline(jobDescription, resumes, options);
+
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
 }
+
