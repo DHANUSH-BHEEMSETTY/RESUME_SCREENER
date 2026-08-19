@@ -198,12 +198,17 @@ interface WorkExperienceEntry {
 ### `AnalyzedJob`
 
 ```typescript
+interface RequiredExperience {
+  years: number | null;       // e.g. 5 — null if not explicitly stated
+  description: string;        // e.g. "5+ years of full-stack development experience"
+}
+
 interface AnalyzedJob {
   roleTitle: string;
-  requiredSkills: string[];
-  preferredSkills: string[];
-  requiredExperience: string;
-  educationRequirements: string;
+  requiredSkills: string[];       // must-have skills
+  preferredSkills: string[];      // nice-to-have skills ([] if JD doesn't distinguish)
+  requiredExperience: RequiredExperience;
+  educationRequirements: string[];
   certifications: string[];
   responsibilities: string[];
   keywords: string[];

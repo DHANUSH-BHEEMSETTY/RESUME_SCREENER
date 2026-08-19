@@ -49,7 +49,7 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | PDF resume upload (single and batch) | 🔲 Planned |
 | Job description text input | 🔲 Planned |
 | Structured resume data extraction (LLM) | ✅ Implemented |
-| Job description analysis (LLM) | 🔲 Planned |
+| Job description analysis (LLM) | ✅ Implemented |
 | Semantic resume-to-job matching (LLM) | 🔲 Planned |
 | Deterministic weighted scoring | 🔲 Planned |
 | Candidate ranking | 🔲 Planned |
@@ -367,7 +367,7 @@ npm test
 npx vitest run --reporter=verbose
 ```
 
-**Current test status:** 15 tests passing across 1 test file.
+**Current test status:** 32 tests passing across 2 test files.
 
 ---
 

@@ -209,3 +209,52 @@ backend/src/__tests__/resumeExtraction.test.ts
 ### Commit
 
 `feat(ai): add structured resume extraction`
+
+---
+
+## Phase 4 — Job Description Analysis
+
+**Date:** 2026-08-19
+
+### Implemented
+
+- `backend/src/prompts/jobAnalysis.prompt.ts` — 11-rule system prompt; explicit required vs preferred skill distinction; structured `requiredExperience` object with `years` (nullable number) and `description`
+- `backend/src/validation/jobSchema.ts` — Zod schema with `RequiredExperienceSchema` sub-object; all list fields typed as `string[]`
+- `backend/src/services/jobAnalysis.service.ts` — input length validation (50–15,000 chars); LLM call; code fence stripping; Zod validation; maps to `AnalyzedJob`
+- `backend/src/__tests__/jobAnalysis.test.ts` — 18 tests across 5 groups
+- `backend/src/types/index.ts` — `AnalyzedJob.requiredExperience` changed from `string` to `RequiredExperience` object; `educationRequirements` changed from `string` to `string[]`
+
+### Files Added / Modified
+
+```
+backend/src/prompts/jobAnalysis.prompt.ts     ← NEW
+backend/src/validation/jobSchema.ts           ← NEW
+backend/src/services/jobAnalysis.service.ts   ← NEW
+backend/src/__tests__/jobAnalysis.test.ts     ← NEW
+backend/src/types/index.ts                    ← MODIFIED (AnalyzedJob type update)
+```
+
+### Technical Decisions
+
+| Decision | Rationale |
+|---|---|
+| `requiredExperience` as object `{ years, description }` | `years` as number enables scoring engine to compare numerically against candidate experience; `description` preserves verbatim context |
+| `educationRequirements` as `string[]` | Multiple education requirements can exist (e.g., "B.Sc. or equivalent experience"); array models this cleanly |
+| Input length validation before LLM | Fail-fast on empty/garbage input; prevents wasteful API calls; protects against oversized payloads |
+| JD analyzed once per batch | The `AnalyzedJob` is computed once and shared across all candidate matching calls, saving N-1 LLM calls per batch |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | ✅ Zero errors |
+| `npm test` (all files) | ✅ 32/32 pass (15 resume + 17 JD tests) |
+
+### Known Limitations
+
+- LLM tests use mocks — real API accuracy verified manually
+- JD analysis doesn't validate that role title is meaningful (just non-empty string)
+
+### Commit
+
+`feat(ai): add job description analysis`

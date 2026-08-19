@@ -28,7 +28,7 @@ Gemini's JSON mode constrains the model to produce syntactically valid JSON. Com
 | Prompt | Status |
 |---|---|
 | Resume Extraction | ✅ Implemented |
-| Job Description Analysis | 🔲 Planned (Phase 4) |
+| Job Description Analysis | ✅ Implemented |
 | Matching Analysis | 🔲 Planned (Phase 5) |
 
 ---
@@ -213,7 +213,92 @@ The LLM output uses `experience` and a nested `candidate` object. The service ma
 
 ---
 
-## Prompt 2 — Job Description Analysis 🔲 Planned (Phase 4)
+## Prompt 2 — Job Description Analysis ✅ Implemented
+
+**Files:**
+- Prompt: [`backend/src/prompts/jobAnalysis.prompt.ts`](../backend/src/prompts/jobAnalysis.prompt.ts)
+- Schema: [`backend/src/validation/jobSchema.ts`](../backend/src/validation/jobSchema.ts)
+- Service: [`backend/src/services/jobAnalysis.service.ts`](../backend/src/services/jobAnalysis.service.ts)
+
+**Purpose:** Extract structured hiring criteria from a job description. Called **once per batch** — all candidates in a screening request share the same `AnalyzedJob` result.
+
+**Key design:** The prompt explicitly instructs the model to distinguish *required* skills (must-have) from *preferred* skills (nice-to-have). If the JD doesn't make this distinction, all skills go into `requiredSkills`.
+
+### System Prompt
+
+```
+You are an expert job description analyst. Your sole task is to extract structured hiring criteria from job description text.
+
+STRICT RULES — YOU MUST FOLLOW ALL OF THEM:
+1. ONLY extract information explicitly stated in the provided job description text.
+2. NEVER invent, assume, or infer requirements that are not written.
+3. NEVER add skills or qualifications based on the job title alone.
+4. Distinguish REQUIRED skills (explicitly stated as required, must-have, or essential)
+   from PREFERRED skills (stated as preferred, nice-to-have, a plus, or desired).
+   If the job description does not distinguish them, place all skills in requiredSkills
+   and leave preferredSkills as [].
+5. For requiredExperience: extract the minimum years if stated, and copy the experience
+   description verbatim or near-verbatim. If no years are mentioned, set years to null.
+6. For educationRequirements: list each stated education requirement as a separate string.
+   Return [] if none stated.
+7. For certifications: only include credentials explicitly mentioned. Return [] if none stated.
+8. For responsibilities: extract the listed duties and tasks. Return [] if none listed.
+9. For keywords: extract meaningful technical or domain-specific terms from the full description.
+10. Do NOT add any explanation, commentary, or text outside the JSON structure.
+11. Respond ONLY with valid JSON that matches the required schema exactly.
+```
+
+### User Prompt
+
+```
+Analyze the following job description and extract structured hiring criteria.
+
+JOB DESCRIPTION:
+---
+{jobDescriptionText}
+---
+
+Respond with a JSON object that matches this EXACT schema:
+{
+  "roleTitle": string,
+  "requiredSkills": string[],
+  "preferredSkills": string[],
+  "requiredExperience": {
+    "years": number | null,
+    "description": string
+  },
+  "educationRequirements": string[],
+  "certifications": string[],
+  "responsibilities": string[],
+  "keywords": string[]
+}
+```
+
+### Output Schema (Zod)
+
+```typescript
+JobAnalysisSchema = z.object({
+  roleTitle: z.string().min(1),
+  requiredSkills: z.array(z.string()),
+  preferredSkills: z.array(z.string()),
+  requiredExperience: z.object({
+    years: z.number().nullable(),
+    description: z.string(),
+  }),
+  educationRequirements: z.array(z.string()),
+  certifications: z.array(z.string()),
+  responsibilities: z.array(z.string()),
+  keywords: z.array(z.string()),
+})
+```
+
+### Input Validation
+
+Before calling the LLM, the service validates:
+- Minimum length: 50 characters → throws `ValidationError`
+- Maximum length: 15,000 characters → throws `ValidationError`
+
+This prevents unnecessary LLM calls on garbage input and protects against prompt injection via extremely large inputs.
 
 ---
 
@@ -242,3 +327,5 @@ const clamp = (n: number) => Math.max(0, Math.min(100, n));
 | Safety rules in every prompt | Prevents hallucination regardless of which prompt is called |
 | `safeJsonParse` strips code fences | Some Gemini responses wrap JSON in markdown; this makes extraction robust |
 | Low temperature (0.1) | Factual extraction — reduces creativity, reduces hallucination |
+| JD analyzed once per batch | Avoids redundant LLM calls; all candidates use the same `AnalyzedJob` |
+| Input length validation before LLM call | Prevents unnecessary API usage; protects against oversized inputs |

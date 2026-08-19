@@ -30,12 +30,17 @@ export interface ParsedResume {
 
 // ---- Job description types ---------------------------------
 
+export interface RequiredExperience {
+  years: number | null;
+  description: string;
+}
+
 export interface AnalyzedJob {
   roleTitle: string;
   requiredSkills: string[];
   preferredSkills: string[];
-  requiredExperience: string;
-  educationRequirements: string;
+  requiredExperience: RequiredExperience;
+  educationRequirements: string[];
   certifications: string[];
   responsibilities: string[];
   keywords: string[];

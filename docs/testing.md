@@ -31,6 +31,8 @@ npx vitest run --coverage             # With coverage report
 | Test File | Tests | Status |
 |---|---|---|
 | `src/__tests__/resumeExtraction.test.ts` | 15 | ✅ All passing |
+| `src/__tests__/jobAnalysis.test.ts` | 17 | ✅ All passing |
+| **Total** | **32** | **✅ All passing** |
 
 ---
 
