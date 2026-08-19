@@ -58,7 +58,12 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 | Written justification per candidate | 🔲 Planned |
 | Recruiter dashboard (React) | 🔲 Planned |
 | Candidate detail view with score breakdown | 🔲 Planned |
-| REST API | 🔲 Planned |
+| REST API foundation (Express + TypeScript) | ✅ Implemented |
+| Route structure (`/api/health`, `/api/screen`, `/api/resumes`, `/api/jobs`) | ✅ Implemented |
+| Environment configuration with startup validation | ✅ Implemented |
+| Global error handling (custom error classes) | ✅ Implemented |
+| PDF upload middleware (multer, memory storage) | ✅ Implemented |
+| Request validation for `/api/screen` | ✅ Implemented |
 | LLM response validation (Zod) | 🔲 Planned |
 | LLM error handling and retry | 🔲 Planned |
 
@@ -299,8 +304,6 @@ See [`docs/api.md`](docs/api.md) for full API reference.
 
 ## Setup Instructions
 
-> 🔲 **Planned** — will be updated as implementation progresses
-
 ```bash
 # 1. Clone the repository
 git clone <repo-url>
@@ -310,13 +313,13 @@ cd resume_screener
 cd backend
 npm install
 cp .env.example .env
-# Add your GEMINI_API_KEY to .env
+# Edit .env and set GEMINI_API_KEY to your Google Gemini API key
 npm run dev
 
-# 3. Frontend setup (new terminal)
-cd frontend
-npm install
-npm run dev
+# 3. Frontend setup (new terminal) — 🔲 Planned
+# cd frontend
+# npm install
+# npm run dev
 ```
 
 ---
@@ -335,7 +338,14 @@ npm run dev
 
 ## Running Locally
 
-> 🔲 **Planned**
+```bash
+# Backend (from resume_screener/backend/)
+npm run dev         # development with hot reload on port 3001
+npm run type-check  # TypeScript compilation check
+npm run build       # production build to dist/
+
+# Frontend — 🔲 Planned
+```
 
 ---
 

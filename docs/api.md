@@ -1,6 +1,8 @@
 # API Reference
 
-> **Status:** Planned — not yet implemented
+> **Phase 1:** `GET /api/health` is implemented and live.
+> `POST /api/screen` accepts requests with validation but returns 501 until the LLM pipeline is built in Phase 5.
+> All other endpoints are stubs returning 501.
 
 ---
 
