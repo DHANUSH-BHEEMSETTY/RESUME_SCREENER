@@ -2,19 +2,11 @@
 
 > An AI-powered resume screening tool that matches candidates to job descriptions with explainable, structured scoring.
 
-[![Status](https://img.shields.io/badge/status-in%20development-yellow)]()
-[![Node](https://img.shields.io/badge/node-22.x-green)]()
-[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)]()
-
----
-
 ## Overview
 
 Smart Resume Screener automates the initial resume screening process for recruiters. It accepts one or more PDF resumes and a plain-text job description, then uses a Large Language Model (LLM) to extract structured data and perform semantic matching — producing ranked, scored, and shortlisted candidates with clear written justifications.
 
-The system is designed to be **explainable**, **reliable**, and **demo-ready** — not the most complex AI pipeline possible. Every score can be traced back to specific evidence from the resume.
-
----
+The system is designed to be **explainable**, **reliable**, and **demo-ready**. Every score can be traced back to specific evidence from the resume.
 
 ## Problem Statement
 
@@ -24,8 +16,6 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 - Analyzing the job description to identify what actually matters
 - Applying consistent, weighted, deterministic scoring across all candidates
 - Providing written explanations for every ranking decision
-
----
 
 ## Objectives
 
@@ -38,42 +28,20 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 - Display results in a recruiter-focused dashboard
 - Explain every score with textual evidence
 
----
-
 ## Features
 
-> **Legend:** ✅ Implemented | 🔲 Planned
-
-| Feature | Status |
-|---|---|
-| PDF resume upload (single and batch) | ✅ Implemented |
-| Job description text input | ✅ Implemented |
-| Structured resume data extraction (LLM) | ✅ Implemented |
-| Job description analysis (LLM) | ✅ Implemented |
-| Semantic resume-to-job matching (LLM) | ✅ Implemented |
-| Deterministic weighted scoring | ✅ Implemented |
-| Candidate ranking | ✅ Implemented |
-| Shortlisting with configurable threshold | ✅ Implemented |
-| Skill gap analysis | ✅ Implemented |
-| Written justification per candidate | ✅ Implemented |
-| Recruiter dashboard (React) | ✅ Implemented |
-| Candidate detail view with score breakdown | ✅ Implemented |
-| REST API foundation (Express + TypeScript) | ✅ Implemented |
-| Route structure (`/api/health`, `/api/screen`, `/api/resumes`, `/api/jobs`) | ✅ Implemented |
-| Environment configuration with startup validation | ✅ Implemented |
-| Global error handling (custom error classes) | ✅ Implemented |
-| PDF upload middleware (multer, memory storage) | ✅ Implemented |
-| PDF text extraction (pdf-parse) | ✅ Implemented |
-| LLM provider abstraction (Gemini 1.5 Flash, JSON mode) | ✅ Implemented |
-| Resume extraction prompt with safety rules | ✅ Implemented |
-| Zod schema validation for LLM responses | ✅ Implemented |
-| LLM retry logic (2 retries, exponential backoff) | ✅ Implemented |
-| LLM timeout handling (45s per attempt) | ✅ Implemented |
-| Request validation for `/api/screen` | ✅ Implemented |
-| LLM response validation (Zod) | ✅ Implemented |
-| LLM error handling and retry | ✅ Implemented |
-
----
+- PDF resume upload (single and batch)
+- Job description text input
+- Structured resume data extraction (LLM)
+- Job description analysis (LLM)
+- Semantic resume-to-job matching (LLM)
+- Deterministic weighted scoring
+- Candidate ranking
+- Shortlisting with configurable threshold
+- Skill gap analysis
+- Written justification per candidate
+- Recruiter dashboard (React)
+- Candidate detail view with score breakdown
 
 ## Architecture
 
@@ -97,223 +65,77 @@ Express REST API (Node.js + TypeScript)
         └─► Response               → ranked JSON → Frontend
 ```
 
-### Scoring Formula
-
-```
-overallScore =
-    skillsScore      × 0.45
-  + experienceScore  × 0.30
-  + educationScore   × 0.10
-  + certScore        × 0.05
-  + semanticScore    × 0.10
-```
-
-Shortlist threshold: **≥ 75** (configurable via `SHORTLIST_THRESHOLD` env var).
-
----
-
-## System Workflow
-
-1. Recruiter uploads PDF resumes and pastes a job description
-2. Backend extracts text from each PDF
-3. LLM extracts structured fields from each resume
-4. LLM analyzes the job description into required/preferred criteria
-5. LLM evaluates each candidate against the job description, returning component scores and analysis
-6. Backend applies deterministic formula to compute the final overall score
-7. Candidates are ranked by overall score and shortlisted if score ≥ threshold
-8. Frontend displays the ranked dashboard with score breakdowns and justifications
-
----
-
 ## Tech Stack
 
 ### Backend
-
-| Technology | Purpose |
-|---|---|
-| Node.js 22 | Runtime |
-| Express | HTTP server |
-| TypeScript | Type safety |
-| Zod | Schema validation for LLM responses |
-| multer | PDF file upload handling |
-| pdf-parse | Server-side PDF text extraction |
-| Google Gemini 1.5 Flash | LLM for extraction and matching |
-| dotenv | Environment variable management |
-| cors | Cross-origin request support |
+- Node.js
+- Express
+- TypeScript
+- Zod
+- multer
+- pdf-parse
+- Google Gemini (1.5 Flash)
 
 ### Frontend
-
-| Technology | Purpose |
-|---|---|
-| React 18 | UI framework |
-| Vite | Build tool |
-| TypeScript | Type safety |
-| Tailwind CSS | Utility-first styling |
-| React Router | Client-side routing |
-| Axios | HTTP client |
-| Recharts | Score visualization charts |
-| Lucide React | Icon set |
-
----
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
 
 ## Project Structure
 
-> **Status:** ✅ Implemented
-
 ```
-resume_screener/
+RESUME_SCREENER/
 │
-├── backend/
-│   ├── src/
-│   │   ├── config/         ← env validation
-│   │   ├── controllers/    ← HTTP request/response
-│   │   ├── services/       ← PDF extraction, parsing, scoring
-│   │   ├── llm/            ← LLM provider + prompt templates
-│   │   ├── validation/     ← Zod schemas
-│   │   ├── middleware/      ← upload, error handler
-│   │   ├── routes/         ← Express routes
-│   │   └── types/          ← shared TypeScript types
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── .env.example
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/     ← UI components
-│   │   ├── pages/          ← route-level pages
-│   │   ├── hooks/          ← React hooks
-│   │   ├── services/       ← API client
-│   │   └── types/          ← shared types
-│   ├── index.html
-│   ├── vite.config.ts
-│   └── package.json
-│
-├── docs/                   ← technical documentation
+├── frontend/             ← React + Vite application
+├── backend/              ← Express + TypeScript API
+├── docs/                 ← Technical documentation
+├── .gitignore
+├── .env.example
 └── README.md
 ```
 
----
-
-## Resume Processing
-
-See [`docs/ai-and-prompts.md`](docs/ai-and-prompts.md) for full prompt design.
-
-The system extracts the following fields from each resume via a structured LLM prompt:
-
-- Candidate name, email, phone
-- Skills list
-- Education (degree, institution, year)
-- Work experience (title, company, duration, description)
-- Certifications
-
-Safety rules:
-- Return `null` if a field cannot be found — never invent data
-- Return `[]` if a list is empty
-- Do not infer experience from job titles if dates are not present
-
----
-
-## Job Description Analysis
-
-The LLM analyzes the job description into:
-
-- Role title
-- Required skills (must-have)
-- Preferred skills (nice-to-have)
-- Required years/type of experience
-- Education requirements
-- Required certifications
-- Key responsibilities
-- Keywords
-
----
-
-## LLM Approach
+## AI / LLM Approach
 
 **Provider:** Google Gemini 1.5 Flash  
 **Output format:** JSON (using `responseMimeType: "application/json"`)  
 **Validation:** All LLM responses validated against Zod schemas before use  
-**Error handling:** Malformed JSON → retry once → return error response
-
----
-
-## Prompt Design
-
-See [`docs/ai-and-prompts.md`](docs/ai-and-prompts.md) for full prompt text.
 
 Three prompt stages:
-
 1. **Resume Extraction** — extracts structured data from raw PDF text
 2. **Job Description Analysis** — extracts structured criteria from JD text
 3. **Matching Analysis** — evaluates candidate fit against job criteria and provides component scores with written justifications
 
----
-
-## Matching Methodology
-
-Each candidate is evaluated by the LLM against the analyzed job description. The LLM produces:
-
-- Lists of matched and missing skills
-- Qualitative analysis of experience and education fit
-- Component scores (0–100) for each scoring dimension
-- Written strengths, gaps, and recommendation
-
-The LLM does **not** decide the final overall score. Component scores are inputs to a deterministic formula.
-
----
-
 ## Scoring Methodology
 
-See [`docs/scoring.md`](docs/scoring.md) for full detail.
+The final score is calculated deterministically by the application using component scores from the LLM:
 
-| Component | Weight |
-|---|---|
-| Skills Match | 45% |
-| Experience Match | 30% |
-| Education Match | 10% |
-| Certification Match | 5% |
-| Semantic Fit | 10% |
+- Skills Match: 45%
+- Experience Match: 30%
+- Education Match: 10%
+- Certification Match: 5%
+- Semantic Fit: 10%
 
 **Formula:**
-```
-overallScore = round(
-  skills × 0.45 + experience × 0.30 +
-  education × 0.10 + certification × 0.05 +
-  semanticFit × 0.10
-)
-```
+`overallScore = round(skills × 0.45 + experience × 0.30 + education × 0.10 + certification × 0.05 + semanticFit × 0.10)`
 
----
+## Candidate Ranking & Shortlisting
 
-## Candidate Ranking
-
-Candidates are sorted by `overallScore` descending. In the event of ties, the candidate with the higher skills score ranks higher (skills being the highest-weight component).
-
----
-
-## Shortlisting
-
-Candidates with `overallScore >= SHORTLIST_THRESHOLD` (default: 75) are marked as shortlisted. The threshold is configurable via environment variable.
-
----
+Candidates are sorted by `overallScore` descending. Candidates with `overallScore >= SHORTLIST_THRESHOLD` (default: 75) are marked as shortlisted. The threshold is configurable via environment variable.
 
 ## API Overview
 
-See [`docs/api.md`](docs/api.md) for full API reference.
+| Method | Path | Description | Input | Output |
+|---|---|---|---|---|
+| `POST` | `/api/screen` | Screen resumes against a job description | `multipart/form-data` (files: resumes, text: jobDescription) | JSON with ranked candidates |
+| `GET` | `/api/health` | Health check | None | JSON status message |
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/screen` | Screen resumes against a job description |
-| `GET` | `/api/health` | Health check |
-
----
-
-## Setup Instructions
+## Installation & Running Locally
 
 ```bash
 # 1. Clone the repository
-git clone <repo-url>
-cd resume_screener
+git clone https://github.com/DHANUSH-BHEEMSETTY/RESUME_SCREENER
+cd RESUME_SCREENER
 
 # 2. Backend setup
 cd backend
@@ -328,91 +150,46 @@ npm install
 npm run dev
 ```
 
----
-
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `GEMINI_API_KEY` | ✅ | — | Google Gemini API key |
-| `LLM_MODEL` | No | `gemini-1.5-flash` | Model to use |
-| `SHORTLIST_THRESHOLD` | No | `75` | Minimum overall score for shortlisting |
-| `MAX_PDF_SIZE_MB` | No | `10` | Maximum PDF file size |
-| `PORT` | No | `3001` | Backend server port |
+API keys and configurations are handled via `.env` files. **Never commit `.env` to Git.** Use `.env.example` as a template.
 
----
-
-## Running Locally
-
-```bash
-# Backend (from resume_screener/backend/)
-npm run dev         # development with hot reload on port 3001
-npm run type-check  # TypeScript compilation check
-npm run build       # production build to dist/
-
-# Frontend (from resume_screener/frontend/)
-npm run dev         # development with hot reload on port 5173
-npm run build       # production build to dist/
-```
-
----
+**Backend Required Variables:**
+- `GEMINI_API_KEY`: Google Gemini API key
 
 ## Testing
 
-See [`docs/testing.md`](docs/testing.md) for strategy and commands.
-
 ```bash
-# Run tests (from resume_screener/backend/)
+# Run tests (from backend directory)
+cd backend
 npm test
-
-# Run with verbose output
-npx vitest run --reporter=verbose
 ```
 
-**Current test status:** 69 tests passing across 5 test files.
+Tests validate core scoring logic, schema validation, API route handling, and matching engines.
 
----
+## Security
 
-## Security Considerations
-
-See [`docs/security.md`](docs/security.md) for full detail.
-
-Key points:
-- API keys stored in `.env`, never committed
-- Resume content is not logged
-- All uploaded files are processed in memory and not persisted to disk
-- LLM responses are validated before use
-
----
+- API keys are managed exclusively via environment variables and are never committed.
+- Uploaded PDF files are processed in-memory and never persisted to the disk.
+- LLM response structures are validated before any data is presented to the user.
+- Controlled error responses ensure no sensitive stack traces are returned to the frontend.
 
 ## Limitations
 
-> Will be updated as implementation reveals constraints.
-
-- Processing time increases linearly with number of resumes (sequential LLM calls)
-- LLM accuracy depends on resume quality and formatting
-- Non-English resumes are not explicitly supported
-- PDF files with scanned images (no embedded text) cannot be extracted
-
----
+- PDF files with scanned images (no embedded text) cannot be extracted without full OCR support.
+- LLM accuracy depends on resume quality, formatting, and provider availability.
 
 ## Future Improvements
 
-- Parallel LLM processing for batch resumes
-- Vector similarity search for large candidate pools
-- Resume anonymization for bias reduction
-- Export to CSV/Excel
-- Webhook notifications when screening completes
-- User authentication and saved screening sessions
-
----
+- Full OCR support for scanned documents.
+- Recruiter authentication and saved screening sessions.
+- Export results to CSV/Excel.
 
 ## Demo
 
-See [`docs/demo.md`](docs/demo.md) for the demo walkthrough.
-
----
-
-## Git Commit History
-
-> Will be populated as development progresses.
+1. Start the frontend and backend servers.
+2. Open the UI in your browser (`http://localhost:5173`).
+3. Paste a target Job Description.
+4. Upload one or multiple Candidate Resumes (PDF).
+5. Click "Analyze Candidates".
+6. Review the ranked dashboard, explore candidate details, and read the explainable justifications.

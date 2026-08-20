@@ -39,3 +39,4 @@ coverage/
 # Misc
 .npm
 .eslintcache
+!.env.example
