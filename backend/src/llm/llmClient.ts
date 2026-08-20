@@ -12,8 +12,8 @@ export interface LLMProvider {
 // ---- Retry configuration -----------------------------------
 
 const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 1000;
-const TIMEOUT_MS = 45_000;
+const RETRY_DELAY_MS = 2000;   // increased — 2s between retries
+const TIMEOUT_MS = 90_000;     // 90s — Gemini 2.5 thinking can be slow
 
 // ---- Helpers -----------------------------------------------
 
@@ -24,15 +24,18 @@ function sleep(ms: number): Promise<void> {
 function isRetryableError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
   const msg = err.message.toLowerCase();
-  // Retry on rate limits, network errors, 5xx from provider
   return (
     msg.includes('rate limit') ||
     msg.includes('429') ||
     msg.includes('503') ||
+    msg.includes('500') ||
     msg.includes('network') ||
     msg.includes('timeout') ||
     msg.includes('econnreset') ||
-    msg.includes('socket')
+    msg.includes('socket') ||
+    msg.includes('resource_exhausted') ||
+    msg.includes('unavailable') ||
+    msg.includes('internal')
   );
 }
 
@@ -63,17 +66,23 @@ class GeminiProvider implements LLMProvider {
   constructor() {
     const genAI = new GoogleGenerativeAI(config.geminiApiKey);
 
+    // gemini-2.5-flash supports thinking — disable it for JSON extraction tasks
+    // to get faster, deterministic, non-prefixed responses
     const generationConfig: GenerationConfig = {
       responseMimeType: 'application/json',
-      temperature: 0.1,       // Low temperature for factual extraction
+      temperature: 0.1,
       topP: 0.8,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
+      // @ts-ignore — thinkingConfig not yet typed in older SDK versions
+      thinkingConfig: { thinkingBudget: 0 },
     };
 
     this.model = genAI.getGenerativeModel({
       model: config.llmModel,
       generationConfig,
     });
+
+    logger.info('GeminiProvider initialized', { model: config.llmModel });
   }
 
   async complete(systemPrompt: string, userPrompt: string): Promise<string> {
@@ -94,22 +103,47 @@ class GeminiProvider implements LLMProvider {
           'generateContent'
         );
 
-        const text = result.response.text();
+        // Log finish reason for debugging
+        const finishReason = result.response.candidates?.[0]?.finishReason;
+        if (finishReason && finishReason !== 'STOP') {
+          logger.warn(`LLM non-STOP finish reason: ${finishReason}`);
+        }
+
+        // Check for blocked / safety-filtered response
+        if (!result.response.candidates || result.response.candidates.length === 0) {
+          const feedback = result.response.promptFeedback;
+          const blockReason = feedback?.blockReason ?? 'unknown';
+          throw new LLMError(`LLM response blocked: ${blockReason}`);
+        }
+
+        let text: string;
+        try {
+          text = result.response.text();
+        } catch (textErr) {
+          // response.text() can throw if content is filtered
+          throw new LLMError(
+            'LLM response could not be read (possible safety filter)',
+            (textErr instanceof Error ? textErr.message : String(textErr))
+          );
+        }
+
         if (!text || text.trim().length === 0) {
           throw new LLMError('LLM returned an empty response');
         }
 
         return text;
+
       } catch (err) {
         lastError = err;
 
+        // Always log the real underlying error for debugging
+        const rawMsg = err instanceof Error ? err.message : String(err);
+        logger.error(`LLM error on attempt ${attempt}`, { error: rawMsg });
+
         if (err instanceof LLMError) {
-          // LLMError (timeout or empty) — retry if we have attempts left
           if (attempt <= MAX_RETRIES) {
             const delay = RETRY_DELAY_MS * attempt;
-            logger.warn(`LLM error on attempt ${attempt} — retrying in ${delay}ms`, {
-              error: (err as Error).message,
-            });
+            logger.warn(`Retrying LLM (attempt ${attempt}) in ${delay}ms`);
             await sleep(delay);
             continue;
           }
@@ -119,25 +153,26 @@ class GeminiProvider implements LLMProvider {
         if (isRetryableError(err)) {
           if (attempt <= MAX_RETRIES) {
             const delay = RETRY_DELAY_MS * attempt;
-            logger.warn(`Retryable LLM error on attempt ${attempt} — retrying in ${delay}ms`, {
-              error: (err as Error).message,
+            logger.warn(`Retryable Gemini error on attempt ${attempt} — retrying in ${delay}ms`, {
+              error: rawMsg,
             });
             await sleep(delay);
             continue;
           }
         }
 
-        // Non-retryable or exhausted retries
+        // Non-retryable — wrap with real message surfaced
         throw new LLMError(
-          'LLM provider request failed',
-          (err instanceof Error ? err.message : String(err))
+          `LLM provider request failed: ${rawMsg}`,
+          rawMsg
         );
       }
     }
 
+    const finalMsg = lastError instanceof Error ? lastError.message : String(lastError);
     throw new LLMError(
-      'LLM provider request failed after retries',
-      (lastError instanceof Error ? lastError.message : String(lastError))
+      `LLM provider request failed after ${MAX_RETRIES + 1} retries: ${finalMsg}`,
+      finalMsg
     );
   }
 }

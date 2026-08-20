@@ -21,17 +21,36 @@ const SERVICE_NAME = 'ResumeExtractionService';
 function safeJsonParse(raw: string): unknown | null {
   let cleaned = raw.trim();
 
-  // Strip markdown code fences if present (e.g., ```json ... ```)
-  const codeFenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (codeFenceMatch) {
-    cleaned = codeFenceMatch[1].trim();
-  }
+  // 1. Strip markdown code fences
+  const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) cleaned = fenceMatch[1].trim();
 
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    return null;
+  // 2. Grab first top-level JSON object
+  const objStart = cleaned.indexOf('{');
+  if (objStart === -1) return null;
+  cleaned = cleaned.slice(objStart);
+
+  // 3. Straight parse
+  try { return JSON.parse(cleaned); } catch { /* continue */ }
+
+  // 4. Remove trailing commas
+  const noCommas = cleaned.replace(/,\s*([}\]])/g, '$1');
+  try { return JSON.parse(noCommas); } catch { /* continue */ }
+
+  // 5. Auto-close unclosed brackets
+  const stack: string[] = [];
+  let inStr = false, esc = false;
+  for (const ch of noCommas) {
+    if (esc) { esc = false; continue; }
+    if (ch === '\\' && inStr) { esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
   }
+  const repaired = noCommas + stack.reverse().join('');
+  try { return JSON.parse(repaired); } catch { return null; }
 }
 
 // ---- Main service function ---------------------------------
