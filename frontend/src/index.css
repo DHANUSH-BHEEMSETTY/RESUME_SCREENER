@@ -3,7 +3,43 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    @apply h-full overflow-hidden;
+  }
   body {
-    @apply bg-slate-900 text-slate-100 antialiased;
+    @apply text-slate-100 antialiased;
+    background: radial-gradient(48% 58% at 6% 88%, rgba(217,168,255,.13), transparent 68%),
+        radial-gradient(44% 52% at 94% 10%, rgba(127,240,224,.12), transparent 68%),
+        #08080A;
+  }
+}
+
+@layer utilities {
+  .spline-mask {
+    -webkit-mask-image: radial-gradient(ellipse 65% 60% at 50% 50%, #000 32%, transparent 78%);
+    mask-image: radial-gradient(ellipse 65% 60% at 50% 50%, #000 32%, transparent 78%);
+  }
+
+  .fx-mask {
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 34%, #000 68%);
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 34%, #000 68%);
+  }
+
+  .ringfield {
+    background: repeating-radial-gradient(circle at 50% 50%, rgba(127,240,224,.055) 0 1px, transparent 1px 84px);
+  }
+
+  .sheen, .sheen2 {
+    background: conic-gradient(from 0deg,
+      transparent 0 18%, rgba(127,240,224,.06) 24%, transparent 32%,
+      transparent 55%, rgba(217,168,255,.06) 63%, transparent 72%);
+  }
+
+  .vignette {
+    background: radial-gradient(130% 115% at 50% 48%, transparent 56%, #08080Ab3 88%, #08080Ae6 100%);
+  }
+
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
   }
 }
