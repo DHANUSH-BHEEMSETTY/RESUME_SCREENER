@@ -16,18 +16,70 @@ const MAX_JD_LENGTH = 15_000;
 
 // ---- Helpers -----------------------------------------------
 
+/**
+ * Robustly extracts and parses JSON from an LLM response.
+ * Handles: markdown code fences, trailing commas, unclosed brackets, extra text.
+ */
 function safeJsonParse(raw: string): unknown | null {
   let cleaned = raw.trim();
-  const codeFenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (codeFenceMatch) {
-    cleaned = codeFenceMatch[1].trim();
+
+  // 1. Strip markdown code fences
+  const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    cleaned = fenceMatch[1].trim();
   }
+
+  // 2. Extract just the first top-level JSON object if there's surrounding text
+  const objStart = cleaned.indexOf('{');
+  if (objStart === -1) return null;
+  cleaned = cleaned.slice(objStart);
+
+  // 3. Try straight parse first
   try {
     return JSON.parse(cleaned);
+  } catch {
+    // continue to repair attempts
+  }
+
+  // 4. Remove trailing commas before ] or } (common LLM mistake)
+  const noTrailingCommas = cleaned.replace(/,\s*([}\]])/g, '$1');
+  try {
+    return JSON.parse(noTrailingCommas);
+  } catch {
+    // continue
+  }
+
+  // 5. Try to close any unclosed brackets by counting them
+  const repaired = repairJsonBrackets(noTrailingCommas);
+  try {
+    return JSON.parse(repaired);
   } catch {
     return null;
   }
 }
+
+/**
+ * Attempts to repair a JSON string with unclosed brackets/braces
+ * by appending the required closing characters.
+ */
+function repairJsonBrackets(s: string): string {
+  const stack: string[] = [];
+  let inString = false;
+  let escape = false;
+
+  for (const ch of s) {
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+
+  return s + stack.reverse().join('');
+}
+
 
 // ---- Input validation --------------------------------------
 
@@ -66,23 +118,36 @@ export async function analyzeJobDescription(
     jdLength: jobDescriptionText.trim().length,
   });
 
-  // Step 1: Build prompt and call LLM
+  // Step 1: Build prompt and call LLM (with one retry for malformed JSON)
   const userPrompt = buildJDAnalysisPrompt(jobDescriptionText);
 
   let rawResponse: string;
-  try {
-    rawResponse = await llmClient.complete(JD_ANALYSIS_SYSTEM_PROMPT, userPrompt);
-  } catch (err) {
-    logger.error(`${SERVICE_NAME}: LLM call failed`, {
-      error: (err as Error).message,
+  let parsed: unknown | null = null;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const prompt = attempt === 1
+        ? userPrompt
+        : `The previous response was not valid JSON. Please respond again with ONLY a valid JSON object matching the schema. No markdown, no explanation.\n\n${userPrompt}`;
+
+      rawResponse = await llmClient.complete(JD_ANALYSIS_SYSTEM_PROMPT, prompt);
+    } catch (err) {
+      logger.error(`${SERVICE_NAME}: LLM call failed on attempt ${attempt}`, {
+        error: (err as Error).message,
+      });
+      throw err;
+    }
+
+    parsed = safeJsonParse(rawResponse!);
+    if (parsed !== null) break;
+
+    logger.warn(`${SERVICE_NAME}: malformed JSON from LLM (attempt ${attempt}/2)`, {
+      rawSnippet: rawResponse!.slice(0, 200),
     });
-    throw err;
   }
 
-  // Step 2: Parse JSON
-  const parsed = safeJsonParse(rawResponse);
   if (parsed === null) {
-    logger.error(`${SERVICE_NAME}: malformed JSON from LLM`);
+    logger.error(`${SERVICE_NAME}: malformed JSON from LLM after 2 attempts`);
     throw new LLMError('LLM returned malformed JSON for job description analysis');
   }
 

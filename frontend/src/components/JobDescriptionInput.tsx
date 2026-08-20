@@ -1,30 +1,42 @@
 import type { ChangeEvent } from 'react';
 
-export function JobDescriptionInput({
-  value,
-  onChange,
-  disabled
-}: {
+interface Props {
   value: string;
   onChange: (val: string) => void;
   disabled?: boolean;
-}) {
+}
+
+export function JobDescriptionInput({ value, onChange, disabled }: Props) {
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor="jd" className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest">
+    <div className="flex flex-col gap-2 h-full">
+      <label
+        htmlFor="jd-input"
+        className="font-mono text-[10px] tracking-[0.2em] uppercase text-slate-500"
+      >
         Job Description
       </label>
       <textarea
-        id="jd"
-        className="w-full h-48 bg-background/40 backdrop-blur-md border border-slate-800/80 rounded-none p-6 text-slate-200 font-mono text-sm placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]"
-        placeholder="Paste the job description here. Include responsibilities, required skills, and preferred qualifications for best results..."
+        id="jd-input"
         value={value}
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
         disabled={disabled}
+        placeholder="Paste the full job description here — responsibilities, required skills, experience, qualifications..."
+        className="
+          flex-1 w-full min-h-[240px]
+          bg-[#0d0f12] border border-white/[0.06]
+          text-slate-300 font-mono text-xs leading-relaxed
+          placeholder:text-slate-600 placeholder:font-sans
+          px-4 py-4 resize-none
+          focus:outline-none focus:border-cyan-500/40
+          transition-colors duration-200
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
       />
-      <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-        Must be at least 50 characters.
-      </p>
+      {value.length > 0 && value.length < 50 && (
+        <p className="font-mono text-[10px] text-rose-500/70 tracking-widest uppercase">
+          Must be at least 50 characters.
+        </p>
+      )}
     </div>
   );
 }

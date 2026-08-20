@@ -1,34 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-export const SplineBackground: React.FC = () => {
-  const [isReady, setIsReady] = useState(false);
+export function SplineBackground() {
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 2500);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setLoaded(true), 500);
+    return () => clearTimeout(t);
   }, []);
 
   return (
-    <>
-      <div className={`scene absolute inset-0 transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Radial gradient base */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 55% 60% at 50% 50%, rgba(0,245,212,0.04) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 45% at 80% 10%, rgba(192,132,252,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 35% 40% at 10% 90%, rgba(0,245,212,0.05) 0%, transparent 60%),
+            #07080a
+          `
+        }}
+      />
+      {/* 3D Spline scene */}
+      <div
+        className="spline-scene"
+        style={{
+          opacity: loaded ? 0.85 : 0,
+          transition: 'opacity 1.5s ease-in-out',
+        }}
+      >
         <iframe
           src="https://my.spline.design/radialglass-FCxdUgnCPmlILSXsuajGGPf0/"
-          title="radial 3D scene"
-          loading="eager"
-          allow="autoplay; fullscreen"
-          className="block w-full h-full border-0 transform scale-75 origin-center spline-mask"
-          onLoad={() => setIsReady(true)}
-        ></iframe>
+          title="3D Scene"
+          onLoad={() => setLoaded(true)}
+          allow="autoplay"
+        />
       </div>
-      <div className="fx absolute inset-0 pointer-events-none fx-mask">
-        <div className="ringfield absolute inset-[-12%]"></div>
-        <div className="sheen absolute left-1/2 top-1/2 w-[160vmax] h-[160vmax] -ml-[80vmax] -mt-[80vmax] opacity-55 animate-sheenspin"></div>
-        <div className="sheen2 absolute left-1/2 top-1/2 w-[160vmax] h-[160vmax] -ml-[80vmax] -mt-[80vmax] opacity-30 animate-sheenspin-reverse"></div>
-      </div>
-      <div className="vignette absolute inset-0 pointer-events-none"></div>
-      <div className="grain absolute inset-0 pointer-events-none opacity-[0.055]"></div>
-    </>
+      {/* Overlay effects */}
+      <div className="spline-vignette" />
+      <div className="spline-edge-top" />
+      <div className="spline-edge-bottom" />
+      <div className="spline-grain" />
+    </div>
   );
-};
+}

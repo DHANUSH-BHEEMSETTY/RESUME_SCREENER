@@ -2,32 +2,40 @@ import { Activity } from 'lucide-react';
 
 export function Navbar() {
   return (
-    <nav className="w-full border-b border-white/5 bg-background/50 backdrop-blur-md">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-cyan-400">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-[10px] font-mono tracking-widest text-slate-500 uppercase">
-                / Resume Screening System / 07
-              </div>
-              <div className="text-xl font-display font-bold text-white tracking-widest uppercase flex flex-col leading-none mt-1">
-                <span>Resume Screening</span>
-                <span className="text-cyan-400 text-sm">Protocol v2.4</span>
-              </div>
-            </div>
+    <header className="relative z-30 border-b border-white/[0.04] bg-[#07080a]/80 backdrop-blur-xl">
+      <div className="max-w-screen-xl mx-auto px-6 h-14 flex items-center justify-between">
+        
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-cyan-500">
+            <Activity className="w-3.5 h-3.5" />
+            <span className="font-mono text-[10px] tracking-[0.2em] text-slate-500 uppercase">
+              Resume Screening System / 07
+            </span>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></div>
-            <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase">
-              Live Parse | Scene Online
+          <div className="w-px h-4 bg-white/10" />
+          <div className="flex flex-col leading-none">
+            <span className="font-display text-sm font-bold text-white tracking-widest uppercase">
+              Resume Screening
+            </span>
+            <span className="font-display text-xs font-bold text-cyan-500 tracking-widest uppercase">
+              Protocol v2.4
             </span>
           </div>
         </div>
+
+        {/* Right: Status */}
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse-dot" />
+          <span className="font-mono text-[10px] tracking-widest text-slate-400 uppercase">
+            Live Parse
+          </span>
+          <span className="text-slate-700">|</span>
+          <span className="font-mono text-[10px] tracking-widest text-slate-400 uppercase">
+            Scene Online
+          </span>
+        </div>
       </div>
-    </nav>
+    </header>
   );
 }
