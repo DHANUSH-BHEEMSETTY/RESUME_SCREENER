@@ -166,9 +166,14 @@ export async function analyzeJobDescription(
 
   const data = validationResult.data;
 
+  // Fallback: if LLM returned empty roleTitle, extract first meaningful line from JD
+  const roleTitle = data.roleTitle && data.roleTitle.trim().length > 0
+    ? data.roleTitle
+    : jobDescriptionText.trim().split('\n').find(l => l.trim().length > 3)?.trim().slice(0, 80) ?? 'Unknown Role';
+
   // Step 4: Map to AnalyzedJob domain type
   const result: AnalyzedJob = {
-    roleTitle: data.roleTitle,
+    roleTitle,
     requiredSkills: data.requiredSkills,
     preferredSkills: data.preferredSkills,
     requiredExperience: {

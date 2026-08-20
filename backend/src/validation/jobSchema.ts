@@ -14,7 +14,7 @@ const RequiredExperienceSchema = z.object({
  * Lenient defaults so partial LLM responses still succeed validation.
  */
 export const JobAnalysisSchema = z.object({
-  roleTitle: z.string().min(1),
+  roleTitle: z.string().default('Unknown Role'),
   requiredSkills: z.array(z.string()).default([]),
   preferredSkills: z.array(z.string()).default([]),
   requiredExperience: RequiredExperienceSchema,
