@@ -43,6 +43,17 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 - Recruiter dashboard (React)
 - Candidate detail view with score breakdown
 
+## Screenshots
+
+**Screening Dashboard**
+![Screening Dashboard](docs/screenshots/dashboard.png)
+
+**Candidate Results**
+![Candidate Results](docs/screenshots/results.png)
+
+**Candidate Analysis**
+![Candidate Details](docs/screenshots/candidate-details.png)
+
 ## Architecture
 
 See [`docs/architecture.md`](docs/architecture.md) for full detail.
@@ -187,9 +198,14 @@ Tests validate core scoring logic, schema validation, API route handling, and ma
 
 ## Demo
 
-1. Start the frontend and backend servers.
-2. Open the UI in your browser (`http://localhost:5173`).
-3. Paste a target Job Description.
-4. Upload one or multiple Candidate Resumes (PDF).
-5. Click "Analyze Candidates".
-6. Review the ranked dashboard, explore candidate details, and read the explainable justifications.
+To run a complete end-to-end demonstration of the Smart Resume Screener:
+
+1. **Start the Backend:** In the `backend` directory, run `npm run dev`.
+2. **Start the Frontend:** In the `frontend` directory, run `npm run dev`.
+3. **Open the Application:** Navigate to `http://localhost:5173` in your browser.
+4. **Enter a Target Job Description:** Paste a realistic software engineering job description into the text area.
+5. **Upload Resumes:** Drag and drop 3–5 sample candidate PDF resumes into the dropzone.
+6. **Run Screening:** Click the "Run Screening Pipeline" button and wait for the LLM extraction and scoring.
+7. **Review Ranked Candidates:** Once complete, review the dashboard to see total candidates, shortlisted count, and the ranked table of results.
+8. **Open a Candidate:** Click "View Analysis" on any candidate row.
+9. **Review "Why this candidate?":** Observe the AI justification, matched skills, missing skills, and the explicit score breakdown.

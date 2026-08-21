@@ -1,6 +1,4 @@
-# Security Considerations
-
-> **Status:** Planned — controls will be verified during Phase 9
+# Security & Privacy
 
 ---
 

@@ -36,7 +36,7 @@ export function CandidateTable({ candidates, onSelect }: Props) {
     <div className="overflow-hidden border border-white/[0.05]">
       {/* Header */}
       <div className="grid grid-cols-[52px_1fr_110px_140px_110px_140px] items-center px-5 py-2.5 bg-white/[0.015] border-b border-white/[0.05]">
-        {['#', 'Candidate', 'Score', 'Recommendation', 'Status', 'Action'].map((h, i) => (
+        {['Rank', 'Candidate', 'Score', 'Recommendation', 'Status', 'Action'].map((h, i) => (
           <div
             key={i}
             className={`font-mono text-[9px] tracking-[0.2em] uppercase text-slate-600 ${i === 5 ? 'text-right' : ''}`}

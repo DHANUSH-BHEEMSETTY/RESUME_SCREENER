@@ -11,7 +11,7 @@ export function ScreeningSummaryCards({ summary, topScore, roleTitle }: Props) {
   const items = [
     {
       icon: <Users className="w-3.5 h-3.5" />,
-      label: 'Total Parsed',
+      label: 'Candidates',
       value: summary.screened.toLocaleString(),
     },
     {
@@ -21,12 +21,12 @@ export function ScreeningSummaryCards({ summary, topScore, roleTitle }: Props) {
     },
     {
       icon: <Activity className="w-3.5 h-3.5" />,
-      label: 'Top Score',
-      value: topScore !== undefined ? `${topScore}/100` : '—',
+      label: 'Top Match',
+      value: topScore !== undefined ? `${Math.round(topScore)}%` : '—',
     },
     {
       icon: <Clock className="w-3.5 h-3.5" />,
-      label: 'Time',
+      label: 'Processing Time',
       value: `${(summary.processingTimeMs / 1000).toFixed(1)}s`,
     },
   ];

@@ -1,7 +1,5 @@
 # Scoring Methodology
 
-> **Phase 5 complete.** The deterministic scoring engine is implemented and fully tested.
-
 ---
 
 ## Overview

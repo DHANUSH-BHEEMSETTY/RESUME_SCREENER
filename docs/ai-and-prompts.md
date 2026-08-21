@@ -1,8 +1,5 @@
 # AI Design and Prompts
 
-> **Phase 3 complete.** Resume extraction LLM pipeline is implemented and tested.
-> Job description analysis and matching prompts are planned for Phases 4–5.
-
 ---
 
 ## Overview

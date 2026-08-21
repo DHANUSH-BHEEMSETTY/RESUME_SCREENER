@@ -32,7 +32,7 @@ export const config = {
   port: optionalEnvInt('PORT', 3001),
   nodeEnv: optionalEnvString('NODE_ENV', 'development'),
   geminiApiKey: GEMINI_API_KEY,
-  llmModel: optionalEnvString('LLM_MODEL', 'gemini-1.5-flash'),
+  llmModel: optionalEnvString('LLM_MODEL', 'gemini-flash-latest'),
   shortlistThreshold: optionalEnvInt('SHORTLIST_THRESHOLD', 75),
   maxPdfSizeMb: optionalEnvInt('MAX_PDF_SIZE_MB', 10),
 } as const;

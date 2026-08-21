@@ -150,47 +150,53 @@ export function CandidateDetails({ candidate, onBack }: Props) {
       <div className="h-px bg-white/[0.04]" />
 
       {/* ── 3-Column Body ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* ── Column 1: Score Integrity ── */}
+        {/* ── Column 1: Why This Candidate & Scores ── */}
         <div className="flex flex-col gap-4">
+          {/* Why This Candidate */}
+          {analysis.strengths.length > 0 && (
+            <Panel>
+              <PanelLabel icon={<CheckCircle2 className="w-3 h-3 text-cyan-500" />}>Why This Candidate?</PanelLabel>
+              <ul className="flex flex-col gap-2">
+                {analysis.strengths.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                    <span className="text-cyan-500/50 mt-0.5 shrink-0">✓</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          )}
+
+          {/* Score Breakdown */}
           <Panel>
-            <PanelLabel icon={<Zap className="w-3 h-3" />}>Score Integrity</PanelLabel>
+            <PanelLabel icon={<Zap className="w-3 h-3" />}>Score Breakdown</PanelLabel>
             <ScoreDonut score={scores.overall} />
             <p className="font-mono text-[9px] text-slate-600 text-center tracking-widest uppercase -mt-2">Overall Match</p>
             <div className="flex flex-col gap-3 pt-2 border-t border-white/[0.04]">
-              <ScoreBar label="Skills (45%)" score={scores.skills} />
-              <ScoreBar label="Experience (30%)" score={scores.experience} />
-              <ScoreBar label="Education (10%)" score={scores.education} />
-              <ScoreBar label="Semantic (10%)" score={scores.semanticFit} />
+              <ScoreBar label="Skills Match (45%)" score={scores.skills} />
+              <ScoreBar label="Experience Match (30%)" score={scores.experience} />
+              <ScoreBar label="Education Match (10%)" score={scores.education} />
+              <ScoreBar label="Semantic Fit (10%)" score={scores.semanticFit} />
               <ScoreBar label="Certs (5%)" score={scores.certification} />
-            </div>
-          </Panel>
-
-          {/* Confidence / Gaps */}
-          <Panel>
-            <PanelLabel icon={<CheckCircle2 className="w-3 h-3" />}>Confidence / Gaps</PanelLabel>
-            <div className="flex flex-col gap-3">
-              {[
-                { label: 'Resume completeness', value: `${analysis.confidence}%`, good: true },
-                { label: 'Required skills present', value: `${analysis.matchedSkills.length} matched` , good: true },
-                { label: 'Missing skills', value: `${analysis.missingSkills.length}`, good: analysis.missingSkills.length === 0 },
-              ].map((row, i) => (
-                <div key={i} className="flex justify-between items-center py-1.5 border-b border-white/[0.04] last:border-0">
-                  <span className="font-mono text-[10px] text-slate-500">{row.label}</span>
-                  <span className={`font-mono text-[10px] font-bold ${row.good ? 'text-cyan-400' : 'text-rose-400'}`}>
-                    {row.value}
-                  </span>
-                </div>
-              ))}
             </div>
           </Panel>
         </div>
 
-        {/* ── Column 2: Evidence Graph ── */}
+        {/* ── Column 2: Skills & Justification ── */}
         <div className="flex flex-col gap-4">
+          {/* AI Justification */}
+          <Panel>
+            <PanelLabel icon={<Brain className="w-3 h-3" />}>AI Justification</PanelLabel>
+            <blockquote className="font-sans text-sm text-slate-300 leading-relaxed border-l-2 border-cyan-500/30 pl-3">
+              {analysis.justification}
+            </blockquote>
+          </Panel>
+
+          {/* Skills */}
           <Panel className="flex-1">
-            <PanelLabel icon={<CheckCircle2 className="w-3 h-3" />}>Evidence Graph — Matched Skills</PanelLabel>
+            <PanelLabel icon={<CheckCircle2 className="w-3 h-3" />}>Skills</PanelLabel>
 
             {analysis.matchedSkills.length === 0 && analysis.preferredSkillsMatched.length === 0 ? (
               <p className="font-mono text-xs text-slate-600 italic">No required skill matches found.</p>
@@ -211,8 +217,8 @@ export function CandidateDetails({ candidate, onBack }: Props) {
 
             {analysis.preferredSkillsMatched.length > 0 && (
               <>
-                <div className="h-px bg-white/[0.04]" />
-                <PanelLabel icon={null}>Preferred Skills</PanelLabel>
+                <div className="h-px bg-white/[0.04] mt-2 mb-2" />
+                <PanelLabel icon={null}>Preferred Skills Matched</PanelLabel>
                 <div className="flex flex-wrap gap-1.5">
                   {analysis.preferredSkillsMatched.map((m, i) => (
                     <SkillPill key={i} text={m.skill} type="preferred" />
@@ -220,57 +226,34 @@ export function CandidateDetails({ candidate, onBack }: Props) {
                 </div>
               </>
             )}
-
-            {analysis.missingSkills.length > 0 && (
-              <>
-                <div className="h-px bg-white/[0.04]" />
-                <PanelLabel icon={<XCircle className="w-3 h-3 text-rose-500" />}>
-                  <span className="text-rose-500/70">Missing Skills</span>
-                </PanelLabel>
-                <div className="flex flex-wrap gap-1.5">
-                  {analysis.missingSkills.map((m, i) => (
-                    <SkillPill key={i} text={m.skill} type="missing" />
-                  ))}
-                </div>
-              </>
-            )}
           </Panel>
         </div>
 
-        {/* ── Column 3: Neural Evaluation + Context ── */}
+        {/* ── Column 3: Experience, Gaps, Missing ── */}
         <div className="flex flex-col gap-4">
-
-          {/* Neural evaluation */}
-          <Panel>
-            <PanelLabel icon={<Brain className="w-3 h-3" />}>Neural Evaluation</PanelLabel>
-            <blockquote className="font-sans text-sm text-slate-300 leading-relaxed border-l-2 border-cyan-500/30 pl-3">
-              {analysis.justification}
-            </blockquote>
-          </Panel>
-
-          {/* Strengths */}
-          {analysis.strengths.length > 0 && (
+          
+          {/* Missing Skills */}
+          {analysis.missingSkills.length > 0 && (
             <Panel>
-              <PanelLabel icon={<CheckCircle2 className="w-3 h-3 text-cyan-500" />}>Key Strengths</PanelLabel>
-              <ul className="flex flex-col gap-2">
-                {analysis.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
-                    <span className="text-cyan-500/50 mt-0.5 shrink-0">›</span>
-                    {s}
-                  </li>
+              <PanelLabel icon={<XCircle className="w-3 h-3 text-rose-500" />}>
+                <span className="text-rose-500/70">Missing Required Skills</span>
+              </PanelLabel>
+              <div className="flex flex-wrap gap-1.5">
+                {analysis.missingSkills.map((m, i) => (
+                  <SkillPill key={i} text={m.skill} type="missing" />
                 ))}
-              </ul>
+              </div>
             </Panel>
           )}
 
           {/* Gaps */}
           {analysis.gaps.length > 0 && (
             <Panel>
-              <PanelLabel icon={<XCircle className="w-3 h-3 text-rose-500" />}>Identified Gaps</PanelLabel>
+              <PanelLabel icon={<XCircle className="w-3 h-3 text-amber-500" />}>Identified Gaps</PanelLabel>
               <ul className="flex flex-col gap-2">
                 {analysis.gaps.map((g, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
-                    <span className="text-rose-500/50 mt-0.5 shrink-0">›</span>
+                    <span className="text-amber-500/50 mt-0.5 shrink-0">⚠</span>
                     {g}
                   </li>
                 ))}
@@ -281,18 +264,37 @@ export function CandidateDetails({ candidate, onBack }: Props) {
           {/* Experience context */}
           {analysis.experienceAnalysis && (
             <Panel>
-              <PanelLabel icon={<Briefcase className="w-3 h-3" />}>Experience Context</PanelLabel>
-              <p className="text-xs text-slate-400 leading-relaxed">{analysis.experienceAnalysis}</p>
+              <PanelLabel icon={<Briefcase className="w-3 h-3" />}>Experience</PanelLabel>
+              <p className="text-xs text-slate-300 leading-relaxed">{analysis.experienceAnalysis}</p>
             </Panel>
           )}
 
           {/* Education context */}
           {analysis.educationAnalysis && (
             <Panel>
-              <PanelLabel icon={<GraduationCap className="w-3 h-3" />}>Education Context</PanelLabel>
+              <PanelLabel icon={<GraduationCap className="w-3 h-3" />}>Education</PanelLabel>
               <p className="text-xs text-slate-400 leading-relaxed">{analysis.educationAnalysis}</p>
             </Panel>
           )}
+          
+          {/* Confidence */}
+          <Panel>
+            <PanelLabel icon={<CheckCircle2 className="w-3 h-3" />}>Analysis Confidence</PanelLabel>
+            <div className="flex flex-col gap-3">
+              {[
+                { label: 'Overall Confidence', value: `${analysis.confidence}%`, good: analysis.confidence >= 75 },
+                { label: 'Required skills found', value: `${analysis.matchedSkills.length} matched` , good: true },
+              ].map((row, i) => (
+                <div key={i} className="flex justify-between items-center py-1.5 border-b border-white/[0.04] last:border-0">
+                  <span className="font-mono text-[10px] text-slate-500">{row.label}</span>
+                  <span className={`font-mono text-[10px] font-bold ${row.good ? 'text-cyan-400' : 'text-amber-400'}`}>
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
         </div>
 
       </div>

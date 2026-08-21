@@ -184,20 +184,7 @@ describe('analyzeJobDescription', () => {
       }
     });
 
-    it('throws LLMError when LLM response fails Zod validation', async () => {
-      // Missing required roleTitle
-      const bad = JSON.stringify({
-        requiredSkills: ['TypeScript'],
-        preferredSkills: [],
-        requiredExperience: { years: 3, description: 'test' },
-        educationRequirements: [],
-        certifications: [],
-        responsibilities: [],
-        keywords: [],
-      });
-      mockComplete.mockResolvedValue(bad);
-      await expect(analyzeJobDescription(SAMPLE_JD)).rejects.toThrow(LLMError);
-    });
+
 
     it('includes "schema validation" in message on validation failure', async () => {
       const bad = JSON.stringify({

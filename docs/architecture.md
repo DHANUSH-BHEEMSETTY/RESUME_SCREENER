@@ -1,8 +1,5 @@
 # Architecture
 
-> **Phase 1 complete.** Backend Express foundation is live.
-> Frontend and LLM pipeline are planned.
-
 ## Implementation Status
 
 | Component | Status |
@@ -16,12 +13,12 @@
 | `POST /api/screen` (stub, validation only) | ✅ Implemented |
 | `GET /api/resumes` (stub) | ✅ Implemented |
 | `GET /api/jobs` (stub) | ✅ Implemented |
-| PDF extraction service | 🔲 Planned (Phase 2) |
-| LLM resume parser | 🔲 Planned (Phase 3) |
-| LLM job analyzer | 🔲 Planned (Phase 4) |
-| Matching engine | 🔲 Planned (Phase 5) |
-| Score calculator | 🔲 Planned (Phase 5) |
-| Ranker | 🔲 Planned (Phase 6) |
+| PDF extraction service | ✅ Implemented |
+| LLM resume parser | ✅ Implemented |
+| LLM job analyzer | ✅ Implemented |
+| Matching engine | ✅ Implemented |
+| Score calculator | ✅ Implemented |
+| Ranker | ✅ Implemented |
 | React frontend | ✅ Implemented |
 
 ---

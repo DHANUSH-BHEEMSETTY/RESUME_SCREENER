@@ -1,7 +1,5 @@
 # Demo Guide
 
-> **Status:** Planned — will be updated with screenshots and a recording after Phase 10
-
 ---
 
 ## Overview
@@ -14,8 +12,6 @@ This document is the demo walkthrough for Smart Resume Screener. It is intended 
 ---
 
 ## Pre-Demo Setup
-
-> Will be completed after implementation.
 
 ```bash
 # 1. Clone the repo
@@ -148,10 +144,10 @@ Preferred:
 
 ## Screenshots
 
-> Will be added after UI implementation is complete.
+See `docs/screenshots/` for screenshots of the dashboard, candidate results, and candidate analysis.
 
 ---
 
 ## Recording
 
-> Will be added after Phase 10 polish is complete.
+*(Optional: Add a link to a Loom or YouTube recording here)*
