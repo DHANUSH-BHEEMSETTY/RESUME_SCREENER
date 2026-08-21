@@ -1,12 +1,21 @@
 # Smart Resume Screener
 
-> An AI-powered resume screening tool that matches candidates to job descriptions with explainable, structured scoring.
+An AI-powered resume screening tool that matches candidates to job descriptions with explainable, structured scoring.
+
+## Why This Project?
+
+- Structured AI extraction instead of raw text matching
+- Semantic resume-to-job matching
+- Deterministic weighted scoring
+- Explainable candidate ranking
+- Batch screening
+- Recruiter-focused interface
+- Modular backend architecture
+- Validated LLM responses
 
 ## Overview
 
 Smart Resume Screener automates the initial resume screening process for recruiters. It accepts one or more PDF resumes and a plain-text job description, then uses a Large Language Model (LLM) to extract structured data and perform semantic matching — producing ranked, scored, and shortlisted candidates with clear written justifications.
-
-The system is designed to be **explainable**, **reliable**, and **demo-ready**. Every score can be traced back to specific evidence from the resume.
 
 ## Problem Statement
 
@@ -45,36 +54,56 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 
 ## Screenshots
 
-**Screening Dashboard**
-![Screening Dashboard](docs/screenshots/candidate-details.png)
+### Screening Dashboard
 
-**Candidate Results**
+![Screening Dashboard](docs/screenshots/dashboard.png)
+
+### Candidate Results
+
 ![Candidate Results](docs/screenshots/results.png)
 
-**Candidate Analysis**
-![Candidate Details](docs/screenshots/dashboard.png)
+### Candidate Analysis
+
+![Candidate Analysis](docs/screenshots/candidate-details.png)
 
 ## Architecture
 
-See [`docs/architecture.md`](docs/architecture.md) for full detail.
+![Smart Resume Screener Architecture](docs/screenshots/architecture-overview.png)
 
-**High-level flow:**
+Browser
+  ↓
+React + Vite
+  ↓
+Express REST API
+  ↓
+PDF Extraction
+  ↓
+Resume Extraction (LLM)
+  ↓
+Job Description Analysis (LLM)
+  ↓
+Matching Analysis (LLM)
+  ↓
+Deterministic Score Calculator
+  ↓
+Candidate Ranker
+  ↓
+JSON Response
+  ↓
+Recruiter Dashboard
 
-```
-Browser (React + Vite)
-        │
-        │  POST /api/screen  (multipart/form-data)
-        ▼
-Express REST API (Node.js + TypeScript)
-        │
-        ├─► PDF Extractor          → raw text per resume
-        ├─► Resume Parser  (LLM)   → ParsedResume JSON
-        ├─► JD Analyzer    (LLM)   → AnalyzedJob JSON
-        ├─► Matching Engine (LLM)  → MatchResult JSON
-        ├─► Score Calculator       → deterministic weighted scores
-        ├─► Ranker                 → sorted + shortlisted candidates
-        └─► Response               → ranked JSON → Frontend
-```
+For more details, see [docs/architecture.md](docs/architecture.md).
+
+## System Workflow
+
+1. User uploads PDFs and enters a Job Description via the React frontend.
+2. The Express backend receives the files and extracts raw text using `pdf-parse`.
+3. The LLM extracts a structured JSON object from each resume.
+4. The LLM analyzes the Job Description to extract hiring criteria.
+5. The matching engine compares the candidate JSON to the job JSON to compute component scores.
+6. A deterministic scoring formula computes the overall score.
+7. The ranker sorts candidates and applies the shortlist threshold.
+8. The frontend displays the ranked dashboard and detailed analysis.
 
 ## Tech Stack
 
@@ -85,7 +114,7 @@ Express REST API (Node.js + TypeScript)
 - Zod
 - multer
 - pdf-parse
-- Google Gemini (1.5 Flash)
+- Google Gemini API
 
 ### Frontend
 - React
@@ -108,18 +137,26 @@ RESUME_SCREENER/
 
 ## AI / LLM Approach
 
-**Provider:** Google Gemini 1.5 Flash  
+**Provider:** Google Gemini 1.5 Flash (`gemini-flash-latest`)  
 **Output format:** JSON (using `responseMimeType: "application/json"`)  
-**Validation:** All LLM responses validated against Zod schemas before use  
+**Validation:** All LLM responses are validated against Zod schemas before use.  
 
-Three prompt stages:
-1. **Resume Extraction** — extracts structured data from raw PDF text
-2. **Job Description Analysis** — extracts structured criteria from JD text
-3. **Matching Analysis** — evaluates candidate fit against job criteria and provides component scores with written justifications
+### Stage 1 — Resume Extraction
+PDF text → structured candidate JSON
+
+### Stage 2 — Job Description Analysis
+Job description → structured requirements JSON
+
+### Stage 3 — Matching Analysis
+Resume JSON + Job JSON → semantic matching analysis
+
+The final overall score is calculated deterministically by the application rather than directly trusting an LLM-generated overall number.
+
+For more details, see [docs/ai-and-prompts.md](docs/ai-and-prompts.md).
 
 ## Scoring Methodology
 
-The final score is calculated deterministically by the application using component scores from the LLM:
+The overall score is calculated by the application using a fixed, deterministic weighted formula. The LLM provides only the individual component scores (0-100), which are then clamped and weighted.
 
 - Skills Match: 45%
 - Experience Match: 30%
@@ -128,34 +165,66 @@ The final score is calculated deterministically by the application using compone
 - Semantic Fit: 10%
 
 **Formula:**
-`overallScore = round(skills × 0.45 + experience × 0.30 + education × 0.10 + certification × 0.05 + semanticFit × 0.10)`
+```
+overallScore = 
+    skillsScore * 0.45 +
+    experienceScore * 0.30 +
+    educationScore * 0.10 +
+    certificationScore * 0.05 +
+    semanticScore * 0.10
+```
+
+For more details, see [docs/scoring.md](docs/scoring.md).
 
 ## Candidate Ranking & Shortlisting
 
-Candidates are sorted by `overallScore` descending. Candidates with `overallScore >= SHORTLIST_THRESHOLD` (default: 75) are marked as shortlisted. The threshold is configurable via environment variable.
+Candidates are sorted by their `overallScore` in descending order. Candidates with an `overallScore >= SHORTLIST_THRESHOLD` (default is 75) are marked as shortlisted. The threshold is configurable via the `SHORTLIST_THRESHOLD` environment variable.
+
+## Explainable Candidate Screening
+
+The system provides extensive explainability, including:
+- overall match score
+- component score breakdown
+- matched skills
+- missing skills
+- strengths
+- gaps
+- experience analysis
+- education analysis
+- recommendation
+- AI justification
+- confidence where available
+
+Recruiters can understand WHY a candidate was ranked highly rather than receiving only a black-box score.
 
 ## API Overview
 
-| Method | Path | Description | Input | Output |
-|---|---|---|---|---|
-| `POST` | `/api/screen` | Screen resumes against a job description | `multipart/form-data` (files: resumes, text: jobDescription) | JSON with ranked candidates |
+| Method | Endpoint | Purpose | Input | Output |
+|--------|----------|---------|-------|--------|
+| `POST` | `/api/screen` | Screen resumes against a job description | `multipart/form-data` (files: `resumes`, text: `jobDescription`) | JSON with ranked candidates |
 | `GET` | `/api/health` | Health check | None | JSON status message |
+
+For more details, see [docs/api.md](docs/api.md).
 
 ## Installation & Running Locally
 
+1. Clone the repository:
 ```bash
-# 1. Clone the repository
-git clone https://github.com/DHANUSH-BHEEMSETTY/RESUME_SCREENER
+git clone https://github.com/DHANUSH-BHEEMSETTY/RESUME_SCREENER.git
 cd RESUME_SCREENER
+```
 
-# 2. Backend setup
+2. Start the backend:
+```bash
 cd backend
 npm install
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY to your Google Gemini API key
+# Edit .env and set GEMINI_API_KEY
 npm run dev
+```
 
-# 3. Frontend setup (new terminal)
+3. Start the frontend (in a new terminal):
+```bash
 cd frontend
 npm install
 npm run dev
@@ -163,49 +232,101 @@ npm run dev
 
 ## Environment Variables
 
-API keys and configurations are handled via `.env` files. **Never commit `.env` to Git.** Use `.env.example` as a template.
+API keys and configurations are handled via `.env` files. 
+- Backend secrets remain server-side.
+- `.env` must never be committed.
+- `.env.example` is provided as a template.
 
-**Backend Required Variables:**
-- `GEMINI_API_KEY`: Google Gemini API key
+**Backend Variables:**
+- `GEMINI_API_KEY` (Required): Your Google Gemini API key
+- `PORT` (Optional): Backend port (default `3001`)
+- `LLM_MODEL` (Optional): AI model string (default `gemini-flash-latest`)
+- `SHORTLIST_THRESHOLD` (Optional): Minimum score for shortlisting (default `75`)
+- `MAX_PDF_SIZE_MB` (Optional): Upload limit (default `10`)
 
 ## Testing
 
+Run tests from the backend directory:
 ```bash
-# Run tests (from backend directory)
 cd backend
 npm test
 ```
 
-Tests validate core scoring logic, schema validation, API route handling, and matching engines.
+For more details, see [docs/testing.md](docs/testing.md).
 
 ## Security
 
-- API keys are managed exclusively via environment variables and are never committed.
-- Uploaded PDF files are processed in-memory and never persisted to the disk.
-- LLM response structures are validated before any data is presented to the user.
-- Controlled error responses ensure no sensitive stack traces are returned to the frontend.
+- environment-based API keys
+- `.env` excluded from Git
+- PDF validation
+- structured LLM response validation
+- controlled error responses
+- no sensitive stack traces sent to frontend
+
+For more details, see [docs/security.md](docs/security.md).
 
 ## Limitations
 
-- PDF files with scanned images (no embedded text) cannot be extracted without full OCR support.
-- LLM accuracy depends on resume quality, formatting, and provider availability.
+- scanned PDFs without embedded text require OCR
+- LLM accuracy depends on input quality/provider availability
 
 ## Future Improvements
 
-- Full OCR support for scanned documents.
-- Recruiter authentication and saved screening sessions.
-- Export results to CSV/Excel.
+- OCR support
+- recruiter authentication
+- saved screening sessions
+- CSV export
+- advanced recruiter analytics
 
 ## Demo
 
-To run a complete end-to-end demonstration of the Smart Resume Screener:
+To run a complete 2–3 minute demonstration of the Smart Resume Screener:
 
-1. **Start the Backend:** In the `backend` directory, run `npm run dev`.
-2. **Start the Frontend:** In the `frontend` directory, run `npm run dev`.
-3. **Open the Application:** Navigate to `http://localhost:5173` in your browser.
-4. **Enter a Target Job Description:** Paste a realistic software engineering job description into the text area.
-5. **Upload Resumes:** Drag and drop 3–5 sample candidate PDF resumes into the dropzone.
-6. **Run Screening:** Click the "Run Screening Pipeline" button and wait for the LLM extraction and scoring.
-7. **Review Ranked Candidates:** Once complete, review the dashboard to see total candidates, shortlisted count, and the ranked table of results.
-8. **Open a Candidate:** Click "View Analysis" on any candidate row.
-9. **Review "Why this candidate?":** Observe the AI justification, matched skills, missing skills, and the explicit score breakdown.
+### 1. Define the role
+Paste the target job description.
+
+### 2. Upload candidates
+Upload 3–5 sample resumes.
+
+### 3. Run screening
+Start the AI screening pipeline.
+
+### 4. Review ranking
+Show candidates sorted by overall score.
+
+### 5. Open top candidate
+Show score breakdown.
+
+### 6. Explain the result
+Show matched skills, missing skills, strengths, gaps, and AI justification.
+
+### 7. Compare candidates
+Open a lower-ranked candidate and explain the difference.
+
+### 8. Close
+Highlight:
+- structured extraction
+- semantic matching
+- deterministic scoring
+- explainable ranking
+- automated shortlisting
+
+## Assessment Demo Flow
+
+1. Enter the target job description.
+2. Upload 3–5 sample resume PDFs.
+3. Run the screening pipeline.
+4. Review ranked candidates.
+5. Open the strongest candidate.
+6. Review score breakdown.
+7. Review matched and missing skills.
+8. Review AI justification.
+9. Compare with a lower-ranked candidate.
+
+For more details, see [docs/demo.md](docs/demo.md).
+
+## Development History
+
+The project was developed in sequential phases, starting from a robust Express API foundation, moving to structured AI extraction with Gemini 1.5 Flash, implementing deterministic scoring, and finally wrapping it all in a recruiter-focused React dashboard. 
+
+For a phase-by-phase breakdown, see [docs/development-log.md](docs/development-log.md).
