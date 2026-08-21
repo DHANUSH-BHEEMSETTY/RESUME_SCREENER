@@ -313,6 +313,10 @@ Highlight:
 
 ## Assessment Demo Flow
 
+**[Watch the Demo Video on Loom](https://www.loom.com/share/26475f1dbe3a4da18f068a3f798d2888)**
+
+![Assessment Demo Storyboard](docs/screenshots/demo-storyboard.png)
+
 1. Enter the target job description.
 2. Upload 3–5 sample resume PDFs.
 3. Run the screening pipeline.
