@@ -46,13 +46,13 @@ Manual resume screening is time-consuming, subjective, and inconsistent. Recruit
 ## Screenshots
 
 **Screening Dashboard**
-![Screening Dashboard](docs/screenshots/dashboard.png)
+![Screening Dashboard](docs/screenshots/candidate-details.png)
 
 **Candidate Results**
 ![Candidate Results](docs/screenshots/results.png)
 
 **Candidate Analysis**
-![Candidate Details](docs/screenshots/candidate-details.png)
+![Candidate Details](docs/screenshots/dashboard.png)
 
 ## Architecture
 
